@@ -8,7 +8,7 @@ set -euo pipefail
 
 SUITE=${STRAP_SUITE:-hardy} # Case sensitive
 
-DEFAULT_PACKAGES=language-pack-en-base
+DEFAULT_PACKAGES=language-pack-en-base,ubuntu-keyring,debian-archive-keyring
 DEFAULT_COMPONENTS=main,universe,multiverse,restricted
 DEBOOTSTRAP=/usr/sbin/debootstrap
 DEFAULT_MIRROR=http://old-releases.ubuntu.com/ubuntu
@@ -61,6 +61,50 @@ dpkg --get-selections | awk '{print \$1}' | \
 done)
 EOF
 
+# libapt-pkg4.12 \
+# libbz2-1.0 \
+# libcomerr2 \
+# libdb5.3 \
+# libdebconfclient0 \
+# libgcrypt20 \
+# libgpg-error0 \
+# liblzma \
+# libaudit-common \
+# libaudit1 \
+#libacl1 \
+#libattr1 \
+#libblkid1 \
+#libc-bin \
+#libc6 \
+#libgcc1 \
+#libmount1 \
+#libncurses \
+#libpam-modules-bin \
+#libpam-modules \
+#libpam-runtime \
+#libpam0g \
+#libpcre3 \
+#libreadline6 \
+#libselinux1 \
+#libsemanage-common \
+#libsemanage1 \
+#libsepol1 \
+#libslang2 \
+#libsmartcols1 \
+#libss2 \
+#libstdc++6 \
+#libsystemd0 \
+#libtinfo5 \
+#libusb-0.1-4 \
+#libustr-1.0-1 \
+#libuuid1 \
+#login \
+# multiarch-support \
+# python-apt \
+# sensible-utils \
+# startpar \
+# sysvinit-utils \
+
 PKG_LIST="apt \
 base-files \
 base-passwd \
@@ -76,69 +120,28 @@ dpkg \
 e2fslibs \
 e2fsprogs \
 findutils \
-gcc-4.9-base \
+gcc-4.2-base \
 gnupg \
 gpgv \
 grep \
 gzip \
 hostname \
 initscripts \
-insserv \
-libacl1 \
-libapt-pkg4.12 \
-libattr1 \
-libaudit-common \
-libaudit1 \
-libblkid1 \
-libbz2-1.0 \
-libc-bin \
-libc6 \
-libcomerr2 \
-libdb5.3 \
-libdebconfclient0 \
-libgcc1 \
-libgcrypt20 \
-libgpg-error0 \
-liblzma \
-libmount1 \
-libncurses \
-libpam-modules-bin \
-libpam-modules \
-libpam-runtime \
-libpam0g \
-libpcre3 \
-libreadline6 \
-libselinux1 \
-libsemanage-common \
-libsemanage1 \
-libsepol1 \
-libslang2 \
-libsmartcols1 \
-libss2 \
-libstdc++6 \
-libsystemd0 \
-libtinfo5 \
-libusb-0.1-4 \
-libustr-1.0-1 \
-libuuid1 \
-login \
 lsb-base \
 mawk \
 mount \
-multiarch-support \
 passwd \
 perl-base \
-python-apt \
 readline-common \
 sed \
-sensible-utils \
-startpar \
 sysv-rc \
-sysvinit-utils \
 tar \
 tzdata \
 util-linux \
 zlib1g"
+
+#--force-yes
+PKG_FORCE_LIST="insserv"
 
 cat << EOF > ${ROOTFS}/etc/apt/sources.list
 ## Uncomment the following two lines to fetch updated software from the network
@@ -184,7 +187,8 @@ chroot $ROOTFS apt-get update
 #chroot $ROOTFS cp /var/lib/apt/extended_states /var/lib/apt/extended_states.bak
 chroot $ROOTFS bash -c '/tmp/mark_auto.sh | tee /var/lib/apt/extended_states > /dev/null 2>&1'
 # chroot $ROOTFS apt-mark auto '*'
-chroot $ROOTFS apt-get install ${PKG_LIST}
+chroot $ROOTFS apt-get install -y --force-yes ${PKG_LIST}
+chroot $ROOTFS apt-get install -y --force-yes ${PKG_FORCE_LIST}
 chroot $ROOTFS apt-get --purge autoremove
 #chroot $ROOTFS apt-get update
 #chroot $ROOTFS apt-get dist-upgrade -y
