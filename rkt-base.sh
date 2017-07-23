@@ -1,32 +1,99 @@
 #!/usr/bin/env bash
 #
-# http://ben-collins.blogspot.com.au/2011/06/stripping-ubuntu-system-to-just-basics.html
+# Copyright (C) 2017 TAQTIQA LLC. <http://www.taqtiqa.com>
+#
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License v3
+#along with this program.
+#If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 #
 
-set -ex
-set -euo pipefail
+set -eoux pipefail
 
-SUITE=${STRAP_SUITE:-hardy} # Case sensitive
+ACI_SUITE='hardy' # NB: Lower case - this is case sensitive
+ACI_ARTIFACTS_DIR=/tmp/${ACI_SUITE}
 
-DEFAULT_PACKAGES=language-pack-en-base,ubuntu-keyring,debian-archive-keyring
+DEFAULT_PACKAGES=language-pack-en-base,ubuntu-keyring,debian-archive-keyring,xclip
 DEFAULT_COMPONENTS=main,universe,multiverse,restricted
 DEBOOTSTRAP=/usr/sbin/debootstrap
 DEFAULT_MIRROR=http://old-releases.ubuntu.com/ubuntu
 DEFAULT_VARIANT=minbase
 DEFAULT_ROOTFS=/tmp/rootfs
+DEFAULT_SUITE='xenial'
+DEFAULT_BUILD_ARTIFACTS_DIR=/tmp/artifacts
 
-MIRROR=${STRAP_MIRROR:-$DEFAULT_MIRROR}
+MIRROR=${ACI_MIRROR:-$DEFAULT_MIRROR}
 ROOTFS=${1:-$DEFAULT_ROOTFS}
-PACKAGES=${STRAP_PACKAGES:-$DEFAULT_PACKAGES}
-COMPONENTS=${STRAP_COMPONENTS:-$DEFAULT_COMPONENTS}
-VARIANT=${STRAP_VARIANT:-$DEFAULT_VARIANT}
+PACKAGES=${ACI_PACKAGES:-$DEFAULT_PACKAGES}
+COMPONENTS=${ACI_COMPONENTS:-$DEFAULT_COMPONENTS}
+VARIANT=${ACI_VARIANT:-$DEFAULT_VARIANT}
+SUITE=${ACI_SUITE:-$DEFAULT_SUITE}
 
-buildend() {
+R_VERSION=${R_VERSION:-3.4.1}
+version="${R_VERSION}.1"
+ACI_NAME_SUFFIX="base"
+ACI_NAME="rkt-${ACI_NAME_SUFFIX}" #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
+dist="hardy"
+arch="amd64"
+mirror="http://archive.ubuntu.com/ubuntu"
+out=/tmp/r-aci #$(mktemp -d)
+
+BUILD_AUTHOR="TAQTIQA LLC"
+BUILD_EMAIL="coders@taqtiqa.com"
+BUILD_ORG="taqtiqa.com"
+BUILD_DATE=${BUILD_DATE:-}
+BUILD_ARTIFACTS_DIR=${ACI_ARTIFACTS_DIR:-$DEFAULT_BUILD_ARTIFACTS_DIR}
+ACI_PREFIX="${BUILD_ORG}/${ACI_NAME}"
+
+LC_ALL=en_US.UTF-8
+LANG=en_US.UTF-8
+TERM=xterm
+
+ACBUILD="/opt/acbuild/bin/acbuild --debug"
+MODIFY=${MODIFY:-""}
+FLAGS=${FLAGS:-""}
+IMG_NAME="${BUILD_ORG}/${ACI_NAME}"
+IMG_VERSION=${version}
+# ACI format: {name}-{version}-{os}-{arch}.{ext}
+ACI_FILE=${ACI_NAME}-${version}-linux-${arch}.aci
+ACI_ARTIFACT=${ARTIFACTS_DIR}/${ACI_FILE}
+
+PRIVATE_KEY="./${ACI_NAME}-signingkey.pem"
+PUBLIC_KEY="./${ACI_NAME}-signingkey-public.pem"
+ACI_SIG="${ARTIFACTS_DIR}/${ACI_FILE}.sha256"
+
+function buildend() {
     export EXIT=$?
-    umount $ROOTFS/proc && exit $EXIT
+    umount $ROOTFS/proc
+    umount $ROOTFS/dev
+    exit $EXIT
+}
+
+function check_citool() {
+  if hash travis 2>/dev/null; then
+    CITOOL=travis
+  elif hash circleci 2>/dev/null; then
+    CITOOL=cirleci
+  else
+    echo 'WARNING: No CI tool.  ACI image will not be signed.'
+  fi
 }
 
 trap buildend EXIT
+
+if [ "$EUID" -ne 0 ]; then
+    echo "This script uses functionality which requires root privileges"
+    exit 1
+fi
 
 type $DEBOOTSTRAP >/dev/null
 if [ $? -ne 0 ]; then
@@ -34,114 +101,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-if [ "x$ROOTFS" == "x" ]; then
-    echo "Usage: $0 <path_to_root>"
-    exit 1
-fi
-
 $DEBOOTSTRAP --include $PACKAGES --components $COMPONENTS --variant $VARIANT $SUITE $ROOTFS $MIRROR
-
-echo "do we get here..."
-cat > ${ROOTFS}/etc/apt/sources.list << EOF
-deb $MIRROR $SUITE ${COMPONENTS//,/ }
-deb $MIRROR $SUITE-updates ${COMPONENTS//,/ }
-deb $MIRROR $SUITE-security ${COMPONENTS//,/ }
-EOF
-
-cat > ${ROOTFS}/tmp/mark_auto.sh << EOF
-#!/bin/bash
-
-arch=\$(dpkg --print-architecture)
-dpkg --get-selections | awk '{print \$1}' | \
-(while read pkg; do
-        echo "Package: \$pkg"
-        echo "Architecture: \$arch"
-        echo "Auto-Installed: 1"
-        echo
-done)
-EOF
-
-# libapt-pkg4.12 \
-# libbz2-1.0 \
-# libcomerr2 \
-# libdb5.3 \
-# libdebconfclient0 \
-# libgcrypt20 \
-# libgpg-error0 \
-# liblzma \
-# libaudit-common \
-# libaudit1 \
-#libacl1 \
-#libattr1 \
-#libblkid1 \
-#libc-bin \
-#libc6 \
-#libgcc1 \
-#libmount1 \
-#libncurses \
-#libpam-modules-bin \
-#libpam-modules \
-#libpam-runtime \
-#libpam0g \
-#libpcre3 \
-#libreadline6 \
-#libselinux1 \
-#libsemanage-common \
-#libsemanage1 \
-#libsepol1 \
-#libslang2 \
-#libsmartcols1 \
-#libss2 \
-#libstdc++6 \
-#libsystemd0 \
-#libtinfo5 \
-#libusb-0.1-4 \
-#libustr-1.0-1 \
-#libuuid1 \
-#login \
-# multiarch-support \
-# python-apt \
-# sensible-utils \
-# startpar \
-# sysvinit-utils \
-
-PKG_LIST="apt \
-base-files \
-base-passwd \
-bash \
-bsdutils \
-coreutils \
-dash \
-debconf \
-debian-archive-keyring \
-debianutils \
-diffutils \
-dpkg \
-e2fslibs \
-e2fsprogs \
-findutils \
-gcc-4.2-base \
-gnupg \
-gpgv \
-grep \
-gzip \
-hostname \
-initscripts \
-lsb-base \
-mawk \
-mount \
-passwd \
-perl-base \
-readline-common \
-sed \
-sysv-rc \
-tar \
-tzdata \
-util-linux \
-zlib1g"
-
-#--force-yes
-PKG_FORCE_LIST="insserv"
 
 cat << EOF > ${ROOTFS}/etc/apt/sources.list
 ## Uncomment the following two lines to fetch updated software from the network
@@ -180,17 +140,64 @@ deb http://ppa.launchpad.net/dns/gnu/ubuntu ${SUITE} main
 deb-src http://ppa.launchpad.net/dns/gnu/ubuntu ${SUITE} main
 EOF
 
-#cp /tmp/sources.list ${ROOTFS}/etc/apt/sources.list
+cat << EOF > ${ROOTFS}/etc/apt/apt.conf.d/01lean
+APT::Install-Suggests "0";
+APT::Install-Recommends "0";
+APT::AutoRemove::SuggestsImportant "false";
+APT::AutoRemove::RecommendsImportant "false";
+EOF
 
 chroot $ROOTFS mount -t proc /proc /proc
+chroot $ROOTFS echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
+chroot $ROOTFS locale-gen en_US.utf8
+chroot $ROOTFS /usr/sbin/update-locale LANG=en_US.UTF-8
 chroot $ROOTFS apt-get update
-#chroot $ROOTFS cp /var/lib/apt/extended_states /var/lib/apt/extended_states.bak
-chroot $ROOTFS bash -c '/tmp/mark_auto.sh | tee /var/lib/apt/extended_states > /dev/null 2>&1'
-# chroot $ROOTFS apt-mark auto '*'
-chroot $ROOTFS apt-get install -y --force-yes ${PKG_LIST}
-chroot $ROOTFS apt-get install -y --force-yes ${PKG_FORCE_LIST}
+chroot $ROOTFS apt-get dist-upgrade -y
 chroot $ROOTFS apt-get --purge autoremove
-#chroot $ROOTFS apt-get update
-#chroot $ROOTFS apt-get dist-upgrade -y
+chroot $ROOTFS apt-get --purge autoremove
+chroot $ROOTFS apt-get clean
 umount $ROOTFS/proc
-echo "Finished rootfs build."
+
+echo "Finished ${SUITE} rootfs build."
+
+# Start the build with ACI bootstrapped above
+$ACBUILD begin /tmp/rootfs
+
+# Name the ACI
+$ACBUILD set-name ${IMG_NAME}
+
+# Based on Turnley Linux base image of Debian (12 MB)
+# rkt trust --prefix=tklx.org/base
+#$ACBUILD dep add tklx.org/base:0.1.1
+
+$ACBUILD label add version ${version}
+$ACBUILD label add arch amd64
+$ACBUILD label add os linux
+$ACBUILD annotation add authors "${BUILD_AUTHOR} <${BUILD_EMAIL}>"
+
+$ACBUILD set-user 0
+$ACBUILD set-group 0
+$ACBUILD environment add OS_VERSION ${dist}
+
+# Some recurrences have been known
+$ACBUILD run -- apt-get autoremove --purge -y
+$ACBUILD run -- apt-get autoremove --purge -y
+$ACBUILD run -- apt-get clean
+
+f [ -z "$MODIFY" ]; then
+  # Save the ACI
+  $ACBUILD write --overwrite ${ACI_ARTIFACT}
+fi
+
+
+if [ -f ./${ACI_NAME}-signingkey ]; then
+  # Sign ACI
+  ./script/sign.sh ${ACI_ARTIFACT} ${PRIVATE_KEY}
+  ./script/verify.sh ${ACI_ARTIFACT} ${ACI_SIG} ${PUBLIC_KEY}
+fi
+
+if [ -e ${out}/tmp/ ]; then
+  rm -rf ${out}/tmp/*
+fi
+
+$ACBUILD end

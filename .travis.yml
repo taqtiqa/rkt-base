@@ -1,0 +1,63 @@
+language: generic
+
+#Build order
+#    before_install
+#    install
+#    before_script
+#    script
+#    after_success / after_failure
+#    after_script
+#
+#After the the after_script has run.
+#
+#    before_deploy
+#    deploy
+#    after_deploy
+
+
+notifications:
+  email:
+    recipients:
+      - coders@taqtiqa.com
+    on_success: [always]
+    on_failure: [always]
+
+env:
+  global:
+    - secure: jvBz3Cp6h5yrQ/Vk9U2TzaqeCi1TZqUHnMRst7aq+6CrsRd7dTvPGrVeWbAI12nb8N/t6wo1qoXkZ1HqGpA6cFHfLFItNLX9NgTqXpSe9P0iZQrPDi96qIE4iZApnfX90Ba23cz+wye4mqi/VGziOl8rQPnArELCjuhLYF511Jjqu7pXpXg/hPQM2TMpR0Fzv4Bot+yWZor+bWh6JIfEuofh2qGOPLcj40ixn44a90QnvejqTjNr+R3KbP4/5RNITqqB6flusr4aLlC1H6oaR+6sfyI2qKAHjC8Iy7hXsPrp6Sgvz3BdoCpCK75qBSY4juY2ZMQyGdarx+rQDwPMeHqWGFqJfNCeqDQqbPHU1sBgdsinMSYouJk/BMj82ZjyZav5N2L563yr2lxU5eG4mOZMeI59SoDBp9xQ3q6OwtKjwYRnrPjL+UcjL0Ya2BaM3T3Cf6spzGhhFGvJJ3Q6I1U8xceWiQRXG7Hu/7B7BxY5PwpsrA6TJUBvKNXIRQJvsxqHH8t+SrwitqtolFJlpqMnGHC7L+/i35J9fFPn8VCdyVDDqZC45nUIdR2UW70FjzkTnfDLPgSNPGMp8WBatYLMmgPL9IWOyaRodcKx+aSJLWT0KNfn0MRdqA7GWKUTsMlYHOTrCigYZdmfb2tl/HG2+14MeFwIq7KvbZzA3dw=
+  matrix:
+    - ARCH=amd64
+
+before_install:
+  - git clone https://github.com/taqtiqa/ci.git
+  - cat ci/travis/install-acbuild.sh | sudo bash # pipe to bash not sh!
+
+before_script:
+  - openssl aes-256-cbc -pass 'pass:$ACI_SECRET' -in ./rkt-base-signingkey.pem.enc -out ./rkt-base-signingkey.pem -d -a
+
+script: cat ./rkt-base.sh | sudo bash
+
+after_script: # here's a build step block
+  - echo "We can put normal shell commands here"
+  - echo "more shell commands here"
+
+before_deploy: "echo 'ready?'"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "ENCRYPTED GITHUB OAUTH TOKEN"
+  file:
+    - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
+    - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.sha256"
+    - "${ACI_NAME}-signingkey-public.pem"
+  skip_cleanup: true
+  on:
+    repo: taqtiqa/rkt-base
+    tags: true
+    all_branches: true
+    condition: "$TRAVIS_TAG =~ ^[0-9][0-9.]*$"
+
+after_deploy:
+  - ./after_deploy_1.sh
+  - ./after_deploy_2.sh

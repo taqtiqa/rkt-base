@@ -10,6 +10,10 @@
 /test/version_tmp/
 /tmp/
 
+*-secret
+*-signingkey.pem
+travis-todo.yml
+
 # Used by dotenv library to load environment variables.
 # .env
 
