@@ -29,15 +29,14 @@ env:
 
 before_install:
   - git clone https://github.com/taqtiqa/ci.git
-  - cat ci/travis/install-acbuild.sh | sudo bash # pipe to bash not sh!
-  - cat ./scripts/openssl.sh | sudo bash
+  - cat ci/travis/install-acbuild.sh | sudo bash >/dev/null 2> >(tee -a before_install-stderr.log >&2)
+  - cat ./scripts/openssl.sh | sudo bash >/dev/null 2> >(tee -a before_install-stderr.log >&2)
 
 before_script:
   - openssl aes-256-cbc -pass env:ACI_SECRET -in ./rkt-base-privatekeys.gpg.enc -out ./rkt-base-privatekeys.gpg -d -a
-  - cat ./scripts/openssl.sh | sudo bash
 
 script:
-  - cat ./rkt-base.sh | sudo bash
+  - cat ./rkt-base.sh | sudo bash >> >(tee -a script-stdout.log) 2> >(tee -a script-stderr.log >&2)
 
 after_script: # here's a build step block
   - echo "We can put normal shell commands here"
@@ -45,7 +44,7 @@ after_script: # here's a build step block
 
 before_deploy:
   - echo 'ready?'
-  - cat ./scripts/deploy.sh | bash
+  - cat ./scripts/deploy.sh | bash >> >(tee -a before_deploy-stdout.log) 2> >(tee -a before_deploy-stderr.log >&2)
 
 deploy:
   - provider: releases

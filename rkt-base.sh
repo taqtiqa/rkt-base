@@ -65,6 +65,7 @@ IMG_NAME="${BUILD_ORG}/${ACI_NAME}"
 IMG_VERSION=${version}
 # ACI format: {name}-{version}-{os}-{arch}.{ext}
 ACI_FILE=${ACI_NAME}-${version}-linux-${arch}.aci
+ARTIFACTS_DIR='./'
 ACI_ARTIFACT=${ARTIFACTS_DIR}/${ACI_FILE}
 
 PRIVATE_KEY="./${ACI_NAME}-signingkey.pem"
