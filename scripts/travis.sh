@@ -34,9 +34,6 @@ FILE='./traviskey-public.pem.json'
 TRAVIS_PUBLIC_KEY_PREFIX="./${GIT_NAME}-traviskey-public"
 TRAVIS_PUBLIC_KEY="${TRAVIS_PUBLIC_KEY_PREFIX}.pem"
 
-PRIVATE_KEY="./${GIT_NAME}-signingkey.pem"
-PUBLIC_KEY="./${GIT_NAME}-signingkey-public.pem"
-
 WORKING_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
 function json_value() {

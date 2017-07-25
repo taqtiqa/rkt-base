@@ -42,7 +42,7 @@ function travisencryptfileend() {
       echo "Abnormal end."
     fi
     rm -f ./travis-ca.cert
-    unset ACI_SECRET
+    #unset ACI_SECRET
     exit $EXIT
 }
 
@@ -82,7 +82,7 @@ pushd ${WORKING_DIR}
       # - used to sign files
       openssl rand -base64 1000 | sha512sum | sed 's/ .*//' > ./${GIT_NAME}-secret
       export ACI_SECRET=`cat ./${GIT_NAME}-secret`
-      rm -f ./${GIT_NAME}-secret
+      #rm -f ./${GIT_NAME}-secret
       SEKRET_ENV_VAR="ACI_SECRET=${ACI_SECRET}"
 
       # encrypt given file using secret password
@@ -92,12 +92,13 @@ pushd ${WORKING_DIR}
       SEKRET_ENV_VAR_ENC=$(echo "${SEKRET_ENV_VAR}" | openssl pkeyutl -encrypt -pubin -inkey "${TRAVIS_PUBLIC_KEY}" | base64 --wrap 0)
 
       # Insert encrypted environment variable in your .travis.yml like so
-      echo "# Env variable ACI_SECRET=<s3Kr3t> for ${filename}" >./travis-todo.yml
-      echo "env:" >./travis-todo.yml
+      echo "Local: $(date +%F_%T%Z)  UTC: $(date --utc +%F_%T)" >>./travis-todo.yml
+      echo "# Env variable ACI_SECRET=<s3Kr3t> for ${filename}" >>./travis-todo.yml
+      echo "env:" >>./travis-todo.yml
       echo "  - secure: ${SEKRET_ENV_VAR_ENC}" >>./travis-todo.yml
 
       # Decode the encrypted private key:
-      echo "# In Travis, use the following line and it will output a decrypted file"
+      echo "# In Travis, use the following line and it will output a decrypted file" >>./travis-todo.yml
       echo "before_script:" >>./travis-todo.yml
       echo "  - openssl aes-256-cbc -pass env:ACI_SECRET -in ${filename}.enc -out ${filename} -d -a" >>./travis-todo.yml
     else
