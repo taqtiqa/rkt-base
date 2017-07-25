@@ -75,8 +75,16 @@ ACI_SIG="${ARTIFACTS_DIR}/${ACI_FILE}.sha256"
 
 function buildend() {
     export EXIT=$?
-    umount $ROOTFS/proc
-    umount $ROOTFS/dev
+    ary=("$ROOTFS/proc" "$ROOTFS/dev")
+    for mp in "${array[@]}"
+    do
+      if mountpoint -q "$mp"; then
+        echo "$mp is a mountpoint"
+        umount $mp
+      else
+        echo "$mp is not a mountpoint"
+      fi
+    done
     exit $EXIT
 }
 
