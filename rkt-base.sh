@@ -58,7 +58,7 @@ LC_ALL=en_US.UTF-8
 LANG=en_US.UTF-8
 TERM=xterm
 
-ACBUILD="/opt/acbuild/bin/acbuild --debug"
+ACBUILD="/opt/acbuild/bin/acbuild --engine=chroot --debug"
 MODIFY=${MODIFY:-""}
 FLAGS=${FLAGS:-""}
 IMG_NAME="${BUILD_ORG}/${ACI_NAME}"
@@ -148,6 +148,9 @@ APT::AutoRemove::SuggestsImportant "false";
 APT::AutoRemove::RecommendsImportant "false";
 EOF
 
+# Consider using schroot if build troubles persist
+# https://github.com/neurodebian/travis-chroots/blob/master/tools/travis_chroot
+
 export LANG=C  # https://serverfault.com/questions/350876/setlocale-error-with-chroot
 chroot $ROOTFS mount -t proc /proc /proc
 chroot $ROOTFS echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
@@ -155,8 +158,8 @@ chroot $ROOTFS dpkg-reconfigure locales
 chroot $ROOTFS apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B187F352479B857B
 chroot $ROOTFS apt-get -qq update
 chroot $ROOTFS apt-get -y dist-upgrade
-chroot $ROOTFS apt-get --purge autoremove
-chroot $ROOTFS apt-get --purge autoremove
+chroot $ROOTFS apt-get --purge -y autoremove
+chroot $ROOTFS apt-get --purge -y autoremove
 chroot $ROOTFS apt-get clean
 umount $ROOTFS/proc
 
@@ -182,8 +185,8 @@ $ACBUILD set-group 0
 $ACBUILD environment add OS_VERSION ${dist}
 
 # Some recurrences have been known
-$ACBUILD run -- apt-get autoremove --purge -y
-$ACBUILD run -- apt-get autoremove --purge -y
+$ACBUILD run -- apt-get --purge -y autoremove
+$ACBUILD run -- apt-get --purge -y autoremove
 $ACBUILD run -- apt-get clean
 
 f [ -z "$MODIFY" ]; then
