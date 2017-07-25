@@ -25,10 +25,6 @@
 #
 # Usage: sign <file>
 #
-# NOTE: to generate a public/private key use the following commands:
-#
-#
-# where ./secret contains the passphrase to be used.
 
 set -exuo pipefail
 

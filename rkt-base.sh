@@ -148,12 +148,13 @@ APT::AutoRemove::SuggestsImportant "false";
 APT::AutoRemove::RecommendsImportant "false";
 EOF
 
+export LANG=C  # https://serverfault.com/questions/350876/setlocale-error-with-chroot
 chroot $ROOTFS mount -t proc /proc /proc
 chroot $ROOTFS echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
 chroot $ROOTFS locale-gen en_US.utf8
 chroot $ROOTFS /usr/sbin/update-locale LANG=en_US.UTF-8
-chroot $ROOTFS apt-get update
-chroot $ROOTFS apt-get dist-upgrade -y
+chroot $ROOTFS apt-get -qq update
+chroot $ROOTFS apt-get -y dist-upgrade
 chroot $ROOTFS apt-get --purge autoremove
 chroot $ROOTFS apt-get --purge autoremove
 chroot $ROOTFS apt-get clean
