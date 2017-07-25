@@ -149,15 +149,15 @@ APT::AutoRemove::RecommendsImportant "false";
 EOF
 
 export LANG=C  # https://serverfault.com/questions/350876/setlocale-error-with-chroot
-chroot $ROOTFS mount -t proc /proc /proc
-chroot $ROOTFS echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
-chroot $ROOTFS locale-gen en_US.utf8
-chroot $ROOTFS /usr/sbin/update-locale LANG=en_US.UTF-8
-chroot $ROOTFS apt-get -qq update
-chroot $ROOTFS apt-get -y dist-upgrade
-chroot $ROOTFS apt-get --purge autoremove
-chroot $ROOTFS apt-get --purge autoremove
-chroot $ROOTFS apt-get clean
+LANG=C chroot $ROOTFS mount -t proc /proc /proc
+LANG=C chroot $ROOTFS echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
+LANG=C chroot $ROOTFS locale-gen en_US.utf8
+LANG=C chroot $ROOTFS /usr/sbin/update-locale LANG=en_US.UTF-8
+LANG=C chroot $ROOTFS apt-get -qq update
+LANG=C chroot $ROOTFS apt-get -y dist-upgrade
+LANG=C chroot $ROOTFS apt-get --purge autoremove
+LANG=C chroot $ROOTFS apt-get --purge autoremove
+LANG=C chroot $ROOTFS apt-get clean
 umount $ROOTFS/proc
 
 echo "Finished ${SUITE} rootfs build."
