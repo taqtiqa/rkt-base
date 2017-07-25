@@ -32,7 +32,7 @@ publickey=$1
 string=$2
 
 if [[ $# -lt 2 ]] ; then
-  echo "Usage: sign <file> <private_key>"
+  echo "Usage: travis-encrypt <public_key> <string>"
   exit 1
 fi
 

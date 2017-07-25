@@ -190,10 +190,9 @@ f [ -z "$MODIFY" ]; then
 fi
 
 
-if [ -f ./${ACI_NAME}-signingkey ]; then
+if [ -f ./${ACI_NAME}-privatekeys.gpg ]; then
   # Sign ACI
-  ./script/sign.sh ${ACI_ARTIFACT} ${PRIVATE_KEY}
-  ./script/verify.sh ${ACI_ARTIFACT} ${ACI_SIG} ${PUBLIC_KEY}
+  ./script/sign.sh ${ACI_ARTIFACT}
 fi
 
 if [ -e ${out}/tmp/ ]; then

@@ -8,7 +8,7 @@ Name-Comment: ACI signing key
 Name-Email: coders@taqtiqa.com
 Expire-Date: 0
 Passphrase: rkt
-%pubring rkt.pub
-%secring rkt.sec
+%pubring ./scripts/rkt.pub
+%secring ./scripts/rkt.sec
 %commit
 %echo done

@@ -19,6 +19,8 @@
 #
 # where <passphrase> is the passphrase to be used.
 
+set -exuo pipefail
+
 filename=$1
 signature=$2
 publickey=$3

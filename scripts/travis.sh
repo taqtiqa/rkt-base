@@ -31,8 +31,13 @@ GIT_OWNER=$(basename $(dirname $GIT_URL))
 
 FILE='./traviskey-public.pem.json'
 
+TRAVIS_PUBLIC_KEY_PREFIX="./${GIT_NAME}-traviskey-public"
+TRAVIS_PUBLIC_KEY="${TRAVIS_PUBLIC_KEY_PREFIX}.pem"
+
 PRIVATE_KEY="./${GIT_NAME}-signingkey.pem"
 PUBLIC_KEY="./${GIT_NAME}-signingkey-public.pem"
+
+WORKING_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
 function json_value() {
   KEY=${1-'key'}
@@ -40,12 +45,22 @@ function json_value() {
   awk -F"[,:}]" '{for(i=1;i<=NF;i++){if($i~/'$KEY'\042/){print $(i+1)}}}' | tr -d '"' | sed 's/\\n/\n/g' | sed -n ${num}p
 }
 
+function travisend() {
+    export EXIT=$?
+    rm -f ./travis-ca.cert
+    exit $EXIT
+}
 
-if [ ! -f ./${PRIVATE_KEY}.enc ]; then
-  echo "Encrypted signing key ./${PRIVATE_KEY}.enc not found!"
-  # CI tool independent way to encrypt a signing key
-  # https://gist.github.com/kzap/5819745
-  CA_CERTIFICATE="-----BEGIN CERTIFICATE-----
+trap travisend EXIT
+
+pushd ${WORKING_DIR}
+  pushd ../
+
+    if [ ! -f ${TRAVIS_PUBLIC_KEY} ]; then
+      echo "Travis public key ./${GIT_NAME}-traviskey-public.pem not found!"
+      # CI library/tool independent way to encrypt a signing key
+      # https://gist.github.com/kzap/5819745
+      CA_CERTIFICATE="-----BEGIN CERTIFICATE-----
 MIIENjCCAx6gAwIBAgIBATANBgkqhkiG9w0BAQUFADBvMQswCQYDVQQGEwJTRTEU
 MBIGA1UEChMLQWRkVHJ1c3QgQUIxJjAkBgNVBAsTHUFkZFRydXN0IEV4dGVybmFs
 IFRUUCBOZXR3b3JrMSIwIAYDVQQDExlBZGRUcnVzdCBFeHRlcm5hbCBDQSBSb290
@@ -71,41 +86,14 @@ c4g/VhsxOBi0cQ+azcgOno4uG+GMmIPLHzHxREzGBHNJdmAPx/i9F4BrLunMTA5a
 mnkPIAou1Z5jJh5VkpTYghdae9C8x49OhgQ=
 -----END CERTIFICATE-----
 "
-  # Prepare Travis CI certificate file. Extract Travis-CI public key:
-  echo -n "$CA_CERTIFICATE" >./travis-ca.cert
-  curl --cacert ./travis-ca.cert -s -X GET https://api.travis-ci.org/repos/${GIT_OWNER}/${GIT_NAME}/key | json_value key >./${GIT_NAME}-traviskey-public.pem
-  chmod 400 ./${GIT_NAME}-traviskey-public.pem
+      # Prepare Travis CI certificate file. Extract Travis-CI public key:
+      echo -n "$CA_CERTIFICATE" >./travis-ca.cert
+      curl --cacert ./travis-ca.cert -s -X GET https://api.travis-ci.org/repos/${GIT_OWNER}/${GIT_NAME}/key | json_value key >./${GIT_NAME}-traviskey-public.pem
+      chmod 400 ./${GIT_NAME}-traviskey-public.pem
+      rm ./travis-ca.cert
+    else
+      echo "Travis public key ./${GIT_NAME}-traviskey-public.pem found!"
+    fi
 
-  # Generate the secret to encrypt and store in the .travis.yml
-  # - used to encrypt/decrypt private part of the signing key
-  # - used to sign files
-  openssl rand -base64 1000 | sha1sum | sed 's/ .*//' > ./${GIT_NAME}-secret
-  export ACI_SECRET=`cat ./${GIT_NAME}-secret`
-  rm -f ./${GIT_NAME}-secret
-  SEKRET_ENV_VAR="ACI_SECRET=${ACI_SECRET}"
-
-  openssl genrsa -aes256 -passout env:ACI_SECRET -out ${PRIVATE_KEY} 4096
-  openssl rsa -passin env:ACI_SECRET -in ${PRIVATE_KEY} -pubout -out ${PUBLIC_KEY}
-  chmod 400 ${PUBLIC_KEY}
-
-  # encrypt your private key using secret password
-  openssl aes-256-cbc -pass env:ACI_SECRET -in ${PRIVATE_KEY} -out ${PRIVATE_KEY}.enc -a
-  chmod 400 ${PRIVATE_KEY}.enc
-
-  SEKRET_ENV_VAR_ENC=$(echo "${SEKRET_ENV_VAR}" | openssl pkeyutl -encrypt -pubin -inkey "./${GIT_NAME}-traviskey-public.pem" | base64 --wrap 0)
-
-  # Insert encrypted environment variable in your .travis.yml like so
-  echo "env:" >./travis-todo.yml
-  echo "  - secure: ${SEKRET_ENV_VAR_ENC}" >>./travis-todo.yml
-
-  # Decode the encrypted private key:
-  # In Travis, use the following line and it will output a decrypted my_key file
-  echo "before_script:" >>./travis-todo.yml
-  echo "  - openssl aes-256-cbc -pass env:ACI_SECRET -in ${PRIVATE_KEY}.enc -out ${PRIVATE_KEY} -d -a" >>./travis-todo.yml
-
-  # Remove unencrypted keys and scratch files
-  rm ${PRIVATE_KEY}
-  rm ./travis-ca.cert
-else
-  echo "Encrypted signing key ./${PRIVATE_KEY}.enc found!"
-fi
+  popd
+popd
