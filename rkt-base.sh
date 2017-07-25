@@ -49,7 +49,7 @@ out=/tmp/r-aci #$(mktemp -d)
 
 BUILD_AUTHOR="TAQTIQA LLC"
 BUILD_EMAIL="coders@taqtiqa.com"
-BUILD_ORG="taqtiqa.com"
+BUILD_ORG="taqtiqa.io"
 BUILD_DATE=${BUILD_DATE:-}
 BUILD_ARTIFACTS_DIR=${ACI_ARTIFACTS_DIR:-$DEFAULT_BUILD_ARTIFACTS_DIR}
 ACI_PREFIX="${BUILD_ORG}/${ACI_NAME}"
@@ -58,7 +58,7 @@ LC_ALL=en_US.UTF-8
 LANG=en_US.UTF-8
 TERM=xterm
 
-ACBUILD="/opt/acbuild/bin/acbuild --engine=chroot --debug"
+ACBUILD="/opt/acbuild/bin/acbuild --debug"
 MODIFY=${MODIFY:-""}
 FLAGS=${FLAGS:-""}
 IMG_NAME="${BUILD_ORG}/${ACI_NAME}"
@@ -171,9 +171,9 @@ $ACBUILD begin /tmp/rootfs
 # Name the ACI
 $ACBUILD set-name ${IMG_NAME}
 
-# Based on Turnley Linux base image of Debian (12 MB)
-# rkt trust --prefix=tklx.org/base
-#$ACBUILD dep add tklx.org/base:0.1.1
+# Based on TAQTIQA Linux base image of Ubuntu (12 MB)
+# rkt trust --prefix=taqtiqa.io/rkt-base
+#$ACBUILD dep add taqtiqa.io/rkt-base:0.0.1.1
 
 $ACBUILD label add version ${version}
 $ACBUILD label add arch amd64
@@ -185,9 +185,8 @@ $ACBUILD set-group 0
 $ACBUILD environment add OS_VERSION ${dist}
 
 # Some recurrences have been known
-$ACBUILD run -- apt-get --purge -y autoremove
-$ACBUILD run -- apt-get --purge -y autoremove
-$ACBUILD run -- apt-get clean
+$ACBUILD --engine=chroot run -- apt-get --purge -y autoremove
+$ACBUILD --engine=chroot run -- apt-get clean
 
 f [ -z "$MODIFY" ]; then
   # Save the ACI
