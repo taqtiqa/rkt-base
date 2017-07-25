@@ -189,7 +189,7 @@ $ACBUILD environment add OS_VERSION ${dist}
 #$ACBUILD_RUN --cmd 'apt-get' --args '--purge -y autoremove'
 #$ACBUILD_RUN --cmd 'apt-get' --args 'clean'
 
-f [ -z "$MODIFY" ]; then
+if [ -z "$MODIFY" ]; then
   # Save the ACI
   $ACBUILD write --overwrite ${ACI_ARTIFACT}
 fi
