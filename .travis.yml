@@ -1,5 +1,4 @@
 language: generic
-
 #Build order
 #    before_install
 #    install
@@ -41,22 +40,35 @@ after_script: # here's a build step block
   - echo "We can put normal shell commands here"
   - echo "more shell commands here"
 
-before_deploy: "echo 'ready?'"
+before_deploy:
+  - echo 'ready?'
+  - cat ./scripts/deploy.sh | bash
 
 deploy:
-  provider: releases
-  api_key:
-    secure: "UEsvVGh3SzlQRVVCjAy8XSYOxXpFQtN0BO1vBl2dmrK+7XDeNrzNaFwcW9P6+TuZqGY5+GAdc2GT0WZ0sBXWTU9Orjr1kBn24TCK/N8wPbybzb8+UQS5jUD8D0aOH2tXnTI2eslRPBhcOmrP+HMrJG/kz8jwVolbfheSKsmMhw+wdekUdetm4q1dhncDIN4DeZLGzTUqfjjevXA6cyIDPngu61Pekr5+MAcKu3Q2v+KHdLYym39uytT8sF70zMYPsvGRxv7P9kBiJ30869AVE4XeWyLYh/I3xDLQA1TMh3CvQjepXIhnKaqpLeI4Qji6vwo8nloaPBj9SL02iXFVtKlCy3UohlyAke+jaJo3HLy2KfE8FkYGFjTvq9HId+wGdVHtj2giRNJClUSfAoQgWwVImGawAUJEMn78uIRjEXEUjGcS4cyliVt7n6OCYjnT2Nsu2X4mNeiyFq5u7mc+YynGGt381vnsxWd3iC/AgMrijcgY2D9mgtTR7tOEervpnziojhjBRcI8C3LPmMxvyWUCeXSKjj0TR1RBsIx+k4A7qeapGYrwTbklp6Kuuj6iTSTv6KYgA8IR91c/DcGtkvNtJzSuh+C2mBgFVNH1z1WeS0903nTZg+kyIPYmnNu/PmRoJq/Wm+lSyKh9ZbR68bPoP09JV61OYgPKkXgZHb0="
-  file:
-    - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
-    - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.sha256"
-    - "${ACI_NAME}-signingkey-public.pem"
-  skip_cleanup: true
-  on:
-    repo: taqtiqa/rkt-base
-    tags: true
-    all_branches: true
-    condition: "$TRAVIS_TAG =~ ^[0-9][0-9.]*$"
+  - provider: releases
+    api_key:
+      secure: "UEsvVGh3SzlQRVVCjAy8XSYOxXpFQtN0BO1vBl2dmrK+7XDeNrzNaFwcW9P6+TuZqGY5+GAdc2GT0WZ0sBXWTU9Orjr1kBn24TCK/N8wPbybzb8+UQS5jUD8D0aOH2tXnTI2eslRPBhcOmrP+HMrJG/kz8jwVolbfheSKsmMhw+wdekUdetm4q1dhncDIN4DeZLGzTUqfjjevXA6cyIDPngu61Pekr5+MAcKu3Q2v+KHdLYym39uytT8sF70zMYPsvGRxv7P9kBiJ30869AVE4XeWyLYh/I3xDLQA1TMh3CvQjepXIhnKaqpLeI4Qji6vwo8nloaPBj9SL02iXFVtKlCy3UohlyAke+jaJo3HLy2KfE8FkYGFjTvq9HId+wGdVHtj2giRNJClUSfAoQgWwVImGawAUJEMn78uIRjEXEUjGcS4cyliVt7n6OCYjnT2Nsu2X4mNeiyFq5u7mc+YynGGt381vnsxWd3iC/AgMrijcgY2D9mgtTR7tOEervpnziojhjBRcI8C3LPmMxvyWUCeXSKjj0TR1RBsIx+k4A7qeapGYrwTbklp6Kuuj6iTSTv6KYgA8IR91c/DcGtkvNtJzSuh+C2mBgFVNH1z1WeS0903nTZg+kyIPYmnNu/PmRoJq/Wm+lSyKh9ZbR68bPoP09JV61OYgPKkXgZHb0="
+    file:
+      - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
+      - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
+    skip_cleanup: true
+    on:
+      repo: $TRAVIS_REPO_SLUG
+      tags: true
+      all_branches: true
+      condition: "$TRAVIS_TAG =~ ^[0-9][0-9.]*$"
+  - provider: pages
+    skip_cleanup: true
+    github_token:
+      secure: "UEsvVGh3SzlQRVVCjAy8XSYOxXpFQtN0BO1vBl2dmrK+7XDeNrzNaFwcW9P6+TuZqGY5+GAdc2GT0WZ0sBXWTU9Orjr1kBn24TCK/N8wPbybzb8+UQS5jUD8D0aOH2tXnTI2eslRPBhcOmrP+HMrJG/kz8jwVolbfheSKsmMhw+wdekUdetm4q1dhncDIN4DeZLGzTUqfjjevXA6cyIDPngu61Pekr5+MAcKu3Q2v+KHdLYym39uytT8sF70zMYPsvGRxv7P9kBiJ30869AVE4XeWyLYh/I3xDLQA1TMh3CvQjepXIhnKaqpLeI4Qji6vwo8nloaPBj9SL02iXFVtKlCy3UohlyAke+jaJo3HLy2KfE8FkYGFjTvq9HId+wGdVHtj2giRNJClUSfAoQgWwVImGawAUJEMn78uIRjEXEUjGcS4cyliVt7n6OCYjnT2Nsu2X4mNeiyFq5u7mc+YynGGt381vnsxWd3iC/AgMrijcgY2D9mgtTR7tOEervpnziojhjBRcI8C3LPmMxvyWUCeXSKjj0TR1RBsIx+k4A7qeapGYrwTbklp6Kuuj6iTSTv6KYgA8IR91c/DcGtkvNtJzSuh+C2mBgFVNH1z1WeS0903nTZg+kyIPYmnNu/PmRoJq/Wm+lSyKh9ZbR68bPoP09JV61OYgPKkXgZHb0="
+    branch: master
+    local_dir: gh-pages/
+    target_branch: gh-pages
+    on:
+      repo: $TRAVIS_REPO_SLUG
+      tags: true
+      all_branches: true
+      condition: "$TRAVIS_TAG =~ ^[0-9][0-9.]*$"
 
 after_deploy:
   - echo "We can put normal shell commands here"
