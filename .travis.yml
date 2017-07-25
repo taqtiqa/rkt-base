@@ -1,4 +1,4 @@
-language: generic
+language: ruby
 dist: trusty
 sudo: true
 
