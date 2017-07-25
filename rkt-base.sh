@@ -59,7 +59,7 @@ LANG=en_US.UTF-8
 TERM=xterm
 
 ACBUILD='/opt/acbuild/bin/acbuild --debug'
-ACBUILD_RUN='/opt/acbuild/bin/acbuild-chroot --debug run'
+ACBUILD_RUN="/opt/acbuild/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir '/tmp'"
 MODIFY=${MODIFY:-""}
 FLAGS=${FLAGS:-""}
 IMG_NAME="${BUILD_ORG}/${ACI_NAME}"
@@ -186,8 +186,8 @@ $ACBUILD set-group 0
 $ACBUILD environment add OS_VERSION ${dist}
 
 # Some recurrences have been known
-$ACBUILD_RUN -- apt-get --purge -y autoremove
-$ACBUILD_RUN -- apt-get clean
+$ACBUILD_RUN --cmd 'apt-get' --args '--purge -y autoremove'
+$ACBUILD_RUN --cmd 'apt-get' --args 'clean'
 
 f [ -z "$MODIFY" ]; then
   # Save the ACI
