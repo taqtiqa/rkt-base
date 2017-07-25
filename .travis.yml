@@ -1,4 +1,7 @@
 language: generic
+dist: trusty
+sudo: true
+
 #Build order
 #    before_install
 #    install
