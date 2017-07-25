@@ -18,8 +18,14 @@
 #
 
 OPENSSL_VER='1.1.0f'
+OPENSSL_KEY='0E604491'
 pushd /tmp
-  wget https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz
+  TMP_GPG_HOME=$( mktemp -d -t 'XXXX' )
+  curl -o openssl-${OPENSSL_VER}.tar.gz https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz
+  curl -o openssl-${OPENSSL_VER}.tar.gz.asc https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz.asc
+  curl -o openssl-security.asc https://www.openssl.org/news/openssl-security.asc
+  gpg --homedir ${TMP_GPG_HOME} --no-default-keyring --keyserver pgp.mit.edu --recv-key ${OPENSSL_KEY}
+  gpg --homedir ${TMP_GPG_HOME} --verify --trust-model always openssl-${OPENSSL_VER}.tar.gz.asc
   tar xzvf openssl-${OPENSSL_VER}.tar.gz
   pushd openssl-${OPENSSL_VER}
     ./config -Wl,--enable-new-dtags,-rpath,'$(LIBRPATH)'
@@ -27,5 +33,6 @@ pushd /tmp
     sudo make install
   popd
   rm -rf openssl-${OPENSSL_VER}
+  rm -rf ${TMP_GPG_HOME}
 popd
 #openssl version -a
