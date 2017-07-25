@@ -22,7 +22,7 @@ set -eoux pipefail
 ACI_SUITE='hardy' # NB: Lower case - this is case sensitive
 ACI_ARTIFACTS_DIR=/tmp/${ACI_SUITE}
 
-DEFAULT_PACKAGES=language-pack-en-base,language-pack-en,ubuntu-keyring,debian-archive-keyring,xclip
+DEFAULT_PACKAGES=language-pack-en-base,language-pack-en,ubuntu-keyring,debian-archive-keyring
 DEFAULT_COMPONENTS=main,universe,multiverse,restricted
 DEBOOTSTRAP=/usr/sbin/debootstrap
 DEFAULT_MIRROR=http://old-releases.ubuntu.com/ubuntu
@@ -148,19 +148,10 @@ APT::AutoRemove::SuggestsImportant "false";
 APT::AutoRemove::RecommendsImportant "false";
 EOF
 
-sudo dpkg-reconfigure locales
-sudo apt-get install language-pack-en
-sudo locale-gen en_US.UTF-8
-sudo dpkg-reconfigure locales
-
 export LANG=C  # https://serverfault.com/questions/350876/setlocale-error-with-chroot
 chroot $ROOTFS mount -t proc /proc /proc
 chroot $ROOTFS echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
 chroot $ROOTFS dpkg-reconfigure locales
-chroot $ROOTFS apt-get install language-pack-en
-chroot $ROOTFS /usr/sbin/locale-gen en_US.utf8
-chroot $ROOTFS dpkg-reconfigure locales
-chroot $ROOTFS /usr/sbin/update-locale LANG=en_US.UTF-8
 chroot $ROOTFS apt-get -qq update
 chroot $ROOTFS apt-get -y dist-upgrade
 chroot $ROOTFS apt-get --purge autoremove
