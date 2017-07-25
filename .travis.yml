@@ -30,11 +30,13 @@ env:
 before_install:
   - git clone https://github.com/taqtiqa/ci.git
   - cat ci/travis/install-acbuild.sh | sudo bash # pipe to bash not sh!
+  - cat ./scripts/openssl.sh | sudo bash
 
 before_script:
   - openssl aes-256-cbc -pass env:ACI_SECRET -in ./rkt-base-privatekeys.gpg.enc -out ./rkt-base-privatekeys.gpg -d -a
 
-script: cat ./rkt-base.sh | sudo bash
+script:
+  - cat ./rkt-base.sh | sudo bash
 
 after_script: # here's a build step block
   - echo "We can put normal shell commands here"
