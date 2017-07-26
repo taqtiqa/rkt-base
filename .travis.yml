@@ -47,7 +47,7 @@ after_script: # here's a build step block
 
 before_deploy:
   - echo 'ready?'
-  - cat ./scripts/deploy.sh | bash >> >(tee -a before_deploy-stdout.log) 2> >(tee -a before_deploy-stderr.log >&2)
+  - cat ./scripts/deploy.sh | bash
 
 deploy:
   - provider: releases
