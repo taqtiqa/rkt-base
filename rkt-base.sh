@@ -30,6 +30,9 @@ DEFAULT_VARIANT=minbase
 DEFAULT_ROOTFS=/tmp/rootfs
 DEFAULT_SUITE='xenial'
 DEFAULT_BUILD_ARTIFACTS_DIR=/tmp/artifacts
+DEFAULT_BUILD_VERSION='0.0.0-0' # Default to zero semantic version number
+DEFAULT_ORG='example.com'
+DEFAULT_SLUG='user/repo'
 
 MIRROR=${ACI_MIRROR:-$DEFAULT_MIRROR}
 ROOTFS=${1:-$DEFAULT_ROOTFS}
@@ -39,20 +42,20 @@ VARIANT=${ACI_VARIANT:-$DEFAULT_VARIANT}
 SUITE=${ACI_SUITE:-$DEFAULT_SUITE}
 
 R_VERSION=${R_VERSION:-3.4.1}
-version="${R_VERSION}.1"
-ACI_NAME_SUFFIX="base"
-ACI_NAME="rkt-${ACI_NAME_SUFFIX}" #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
-dist="hardy"
-arch="amd64"
-mirror="http://archive.ubuntu.com/ubuntu"
-out=/tmp/r-aci #$(mktemp -d)
+ACI_NAME=$(basename ${TRAVIS_REPO_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
+ACI_ORG='taqtiqa.io'
+dist='hardy'
+arch='amd64'
+mirror='http://archive.ubuntu.com/ubuntu'
+out=/tmp/r-aci # $(mktemp -d)
 
-BUILD_AUTHOR="TAQTIQA LLC"
-BUILD_EMAIL="coders@taqtiqa.com"
-BUILD_ORG="taqtiqa.io"
+BUILD_AUTHOR='TAQTIQA LLC'
+BUILD_EMAIL='coders@taqtiqa.com'
+BUILD_ORG=${ACI_ORG:-$DEFAULT_ORG}
 BUILD_DATE=${BUILD_DATE:-}
 BUILD_ARTIFACTS_DIR=${ACI_ARTIFACTS_DIR:-$DEFAULT_BUILD_ARTIFACTS_DIR}
-ACI_PREFIX="${BUILD_ORG}/${ACI_NAME}"
+BUILD_VERSION=${TRAVIS_TAG:-$DEFAULT_BUILD_VERSION}
+BUILD_SLUG=${TRAVIS_REPO_SLUG:-$DEFAULT_SLUG}
 
 LC_ALL=en_US.UTF-8
 LANG=en_US.UTF-8
@@ -63,9 +66,8 @@ ACBUILD_RUN="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
 MODIFY=${MODIFY:-""}
 FLAGS=${FLAGS:-""}
 IMG_NAME="${BUILD_ORG}/${ACI_NAME}"
-IMG_VERSION=${version}
 # ACI format: {name}-{version}-{os}-{arch}.{ext}
-ACI_FILE=${ACI_NAME}-${version}-linux-${arch}.aci
+ACI_FILE=${ACI_NAME}-${BUILD_VERSION}-linux-${arch}.aci
 ARTIFACTS_DIR='.'
 ACI_ARTIFACT=${ARTIFACTS_DIR}/${ACI_FILE}
 
@@ -184,7 +186,7 @@ $ACBUILD set-name ${IMG_NAME}
 # rkt trust --prefix=taqtiqa.io/rkt-base
 #$ACBUILD dep add taqtiqa.io/rkt-base:0.0.1.1
 
-$ACBUILD label add version ${version}
+$ACBUILD label add version ${BUILD_VERSION}
 $ACBUILD label add arch amd64
 $ACBUILD label add os linux
 $ACBUILD annotation add authors "${BUILD_AUTHOR} <${BUILD_EMAIL}>"
@@ -198,8 +200,9 @@ $ACBUILD environment add OS_VERSION ${dist}
 #$ACBUILD_RUN --cmd 'apt-get' --args 'clean'
 
 if [ -z "$MODIFY" ]; then
-  # Save the ACI
+  echo "Write the Container Image..."
   $ACBUILD write --overwrite ${ACI_ARTIFACT}
+  echo "Created Container Image ${ACI_ARTIFACT}."
 fi
 
 
