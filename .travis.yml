@@ -39,7 +39,15 @@ before_script:
   - openssl aes-256-cbc -pass env:ACI_SECRET -in ./rkt-base-privatekeys.gpg.enc -out ./rkt-base-privatekeys.gpg -d -a
 
 script:
-  - cat ./rkt-base.sh | sudo bash >> >(tee -a script-stdout.log) 2> >(tee -a script-stderr.log >&2)
+  - cat ./rkt-base.sh | sudo bash >/dev/null 2> >(tee -a script-stderr.log >&2)
+
+after_success:
+  if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) &&
+      [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    echo "This will deploy!"
+  else
+    echo "This will not deploy!"
+  fi
 
 after_script: # here's a build step block
   - echo "We can put normal shell commands here"
@@ -52,14 +60,13 @@ before_deploy:
 
 deploy:
   - provider: releases
-    api_key:
-      secure: "HZkNH2RUBvhOp0Xq4vLHnDMFdcnkI5s9KnJGl32eD5YoGV73EZK5JD28eQFkcsDGbfUoPaYnnwgjh8wzOHaysYl8OfVMpum1x2XglEjGsrgiQ/cXJwtJs3+e+n7qv4XPiArSiMcrCupgheHVwdd6WygSZGTLCjIpfWdth5l7tenFKZImtummUrm/X6B+7Fqlr/l1o+zOEjcwJ4NGQDwUQIGDJmxH76tt1ufKuNAsY2U+k1oUfD8PyyiS8ERGEne0BaFTt0kzfIXjUUcZEnV9p1c5mRvabFfwU+gTKLn4tnYwaU2Lsmu/9t3w0neOEOZ+vI0ANYbz2Ingm5vHzwN5aaHxRHthz9LkjYo8R9HLIiOZni4+qy0mWKNpvkI7Aj5yIF1PlR3iMJVXeOWUDorgJ0CYHuWA048Fnf511/UOhC5G3TygPi63QOD1aMU8cjpdQND1SfDXfoJSSCmN6D+FlvbZadlcAMIaFs+6Sr672omcBdg8fTQHOUM/AiVY383LwtDq/9j6W9OHBKdVp9Fxy/fRJ+9haZjTekBEHujakG8xes6EkTteQOWa06Wua+I31U6ym8uh1uiHSBqBoi1IRLP9U56+q6x6UTKWUHkpW7VJvh+U0m6folpQ2zMia2uRebi0uwG7jdZVJUy5qtfPVxPSECmiE70VPHnW5Xz/P08="
+    api_key: ${GH_PA_TOKEN}
     file:
       - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
       - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
     skip_cleanup: true
     on:
-      repo: $TRAVIS_REPO_SLUG
+      repo: ${TRAVIS_REPO_SLUG}
       tags: true
       all_branches: true
 
