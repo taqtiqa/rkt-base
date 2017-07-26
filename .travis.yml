@@ -28,7 +28,7 @@ env:
   global:
     - secure: RRzSkAp27+Jr1NRHvdfJ51TNzz4YecpJ4nOMrspb9gEphzQbbyQq9rzKvteB7hkwupbwuu7TvYltQemGnPBc8kaFPSobMxyvpGRnwU1ot6OhTRlct/r/v6V05YZg/rpMELzaUcBtGyuc7W5dnpP5PLZJ+cjT1dnkYd8ZsPNvX57w6TWz6lswG+Ezhj5HJ83dbk2+6DUYzsiCYys2rCEv5fFsLYfCX2DlZ1H5sskYFCGRc/hZO2b91cEc6A9aIABp3QGk24r5Wk6nbcnA7AbK3EiwjaKZNLsT192DohVp//Y7b2QHoitjv5d61KcRFyWsCgd2lWjXNkCN8tUPRKmqj0g85jG8kWI2whPHyRzfhEXp71sd+DLGLPc7Lrgy6zDF+OFREjw1UeolvhDL3tnxhAK2K4bq3MmPKms/Su2yEZIm3aN7SmqaMAsVbV1rciRWiJ6AooBnaOWRD8Axkl91xvqA7sZxUXrQTjQfaJ0j2fjHw/BNqZ66i0KeOfd7dsbJY96I1PoMYVNdpPzqruFFplJBYbfnAKQTPFAnuFPJphzH91gt3D7n/A8ryplb1FpCGHWcA3LXK7j3x2GAjXLJeD3Vn7eopbbqMMA1QQwxYu0qNlTuWh25lK+LnBnUMINeHt7pRsa6eg4Jki0cLIFT510qhv91Kt+m/02+7MRZRLY=
   matrix:
-    - ARCH=amd64
+    - ARCH=amd64 ACI_NAME=$(basename $TRAVIS_REPO_SLUG)
 
 before_install:
   - git clone https://github.com/taqtiqa/ci.git
@@ -42,12 +42,13 @@ script:
   - cat ./rkt-base.sh | sudo bash >/dev/null 2> >(tee -a script-stderr.log >&2)
 
 after_success:
-  if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) &&
-      [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    echo "This will deploy!"
-  else
-    echo "This will not deploy!"
-  fi
+  - |
+      if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) &&
+          [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+        echo "This will deploy!"
+      else
+        echo "This will not deploy!"
+      fi
 
 after_script: # here's a build step block
   - echo "We can put normal shell commands here"
