@@ -43,17 +43,16 @@ script:
 
 after_success:
   - |
-      if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) &&
-          [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-        echo "This will deploy!"
+      if ([ ! -z "${TRAVIS_TAG}" ]) && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+        echo "This will run on tag triggered build!"
+        cat ./scripts/deploy.sh | bash
       else
-        echo "This will not deploy!"
+        echo "This will not run on tag triggered build!"
       fi
 
 after_script: # here's a build step block
   - echo "We can put normal shell commands here"
   - echo "more shell commands here"
-  - cat ./scripts/deploy.sh | bash
 
 
 before_deploy:
@@ -63,8 +62,8 @@ deploy:
   - provider: releases
     api_key: ${GH_PA_TOKEN}
     file:
-      - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
-      - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
+      - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
+      - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
     skip_cleanup: true
     on:
       repo: ${TRAVIS_REPO_SLUG}
