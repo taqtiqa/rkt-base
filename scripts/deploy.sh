@@ -59,18 +59,16 @@ fi
 
 if [[ $TRAVIS == "true" ]]; then
   pushd ${WORKING_DIR}
-    pushd ../
-      # Copy PUBLIC_KEYRING to gh=pages folder ready to be deployed
-      if [ -f ${PUBLIC_KEYRING} ]; then
-        # Make a versioned backup of public keyrings - in case of emergency
-        cp --force "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING} .gpg)-${TRAVIS_TAG}.gpg"
-        # Only replace the existing public keyring if it is changed.
-        rsync --checksum "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING})"
-        echo "A GPG public keyring is ready to deploy to GitHub Pages."
-      else
-        echo "A GPG public keyring ${PUBLIC_KEYRING} NOT found!."
-        exit 1
-      fi
-    popd
+    # Copy PUBLIC_KEYRING to gh=pages folder ready to be deployed
+    if [ -f ${PUBLIC_KEYRING} ]; then
+      # Make a versioned backup of public keyrings - in case of emergency
+      cp --force "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING} .gpg)-${TRAVIS_TAG}.gpg"
+      # Only replace the existing public keyring if it is changed.
+      rsync --checksum "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING})"
+      echo "A GPG public keyring is ready to deploy to GitHub Pages."
+    else
+      echo "A GPG public keyring ${PUBLIC_KEYRING} NOT found!."
+      exit 1
+    fi
   popd
 fi
