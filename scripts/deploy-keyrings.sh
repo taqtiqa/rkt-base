@@ -23,13 +23,13 @@
 #
 # Sign a file with a private GPG keyring and password.
 #
-# Usage: deploy.sh
+# Usage: deploy-keyrings.sh
 #
 
 set -exuo pipefail
 
 if [[ $# -gt 0 ]] ; then
-  echo "Usage: deploy.sh"
+  echo "Usage: deploy-keyrings.sh"
   exit 1
 fi
 

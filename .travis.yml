@@ -44,10 +44,11 @@ script:
 after_script: # here's a build step block
   - echo "We can put normal shell commands here"
   - echo "more shell commands here"
+  - cat ./scripts/deploy.sh | bash
+
 
 before_deploy:
   - echo 'ready?'
-  - cat ./scripts/deploy.sh | bash
 
 deploy:
   - provider: releases
@@ -61,18 +62,6 @@ deploy:
       repo: $TRAVIS_REPO_SLUG
       tags: true
       all_branches: true
-      #condition: "$TRAVIS_TAG =~ ^(?:(?<major>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<minor>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<patch>(?:0|[1-9](?:(?:0|[1-9])+)*))(?:-(?<prerelease>(?:0|[1-9](?:(?:0|[1-9])+)*)*))?(?:[+](?<build>(?:0|[1-9](?:(?:0|[1-9])+)*)*))?)$"
-  - provider: pages
-    skip_cleanup: true
-    github_token: $GH_PA_TOKEN
-    branch: master
-    local_dir: gh-pages/
-    target_branch: gh-pages
-    on:
-      repo: $TRAVIS_REPO_SLUG
-      tags: true
-      all_branches: true
-      #condition: "$TRAVIS_TAG =~ ^(?:(?<major>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<minor>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<patch>(?:0|[1-9](?:(?:0|[1-9])+)*))(?:-(?<prerelease>(?:0|[1-9](?:(?:0|[1-9])+)*)*))?(?:[+](?<build>(?:0|[1-9](?:(?:0|[1-9])+)*)*))?)$"
 
 after_deploy:
   - echo "We can put normal shell commands here"
