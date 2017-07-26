@@ -52,7 +52,7 @@ before_deploy:
 deploy:
   - provider: releases
     api_key:
-      secure: "UEsvVGh3SzlQRVVCjAy8XSYOxXpFQtN0BO1vBl2dmrK+7XDeNrzNaFwcW9P6+TuZqGY5+GAdc2GT0WZ0sBXWTU9Orjr1kBn24TCK/N8wPbybzb8+UQS5jUD8D0aOH2tXnTI2eslRPBhcOmrP+HMrJG/kz8jwVolbfheSKsmMhw+wdekUdetm4q1dhncDIN4DeZLGzTUqfjjevXA6cyIDPngu61Pekr5+MAcKu3Q2v+KHdLYym39uytT8sF70zMYPsvGRxv7P9kBiJ30869AVE4XeWyLYh/I3xDLQA1TMh3CvQjepXIhnKaqpLeI4Qji6vwo8nloaPBj9SL02iXFVtKlCy3UohlyAke+jaJo3HLy2KfE8FkYGFjTvq9HId+wGdVHtj2giRNJClUSfAoQgWwVImGawAUJEMn78uIRjEXEUjGcS4cyliVt7n6OCYjnT2Nsu2X4mNeiyFq5u7mc+YynGGt381vnsxWd3iC/AgMrijcgY2D9mgtTR7tOEervpnziojhjBRcI8C3LPmMxvyWUCeXSKjj0TR1RBsIx+k4A7qeapGYrwTbklp6Kuuj6iTSTv6KYgA8IR91c/DcGtkvNtJzSuh+C2mBgFVNH1z1WeS0903nTZg+kyIPYmnNu/PmRoJq/Wm+lSyKh9ZbR68bPoP09JV61OYgPKkXgZHb0="
+      secure: "HZkNH2RUBvhOp0Xq4vLHnDMFdcnkI5s9KnJGl32eD5YoGV73EZK5JD28eQFkcsDGbfUoPaYnnwgjh8wzOHaysYl8OfVMpum1x2XglEjGsrgiQ/cXJwtJs3+e+n7qv4XPiArSiMcrCupgheHVwdd6WygSZGTLCjIpfWdth5l7tenFKZImtummUrm/X6B+7Fqlr/l1o+zOEjcwJ4NGQDwUQIGDJmxH76tt1ufKuNAsY2U+k1oUfD8PyyiS8ERGEne0BaFTt0kzfIXjUUcZEnV9p1c5mRvabFfwU+gTKLn4tnYwaU2Lsmu/9t3w0neOEOZ+vI0ANYbz2Ingm5vHzwN5aaHxRHthz9LkjYo8R9HLIiOZni4+qy0mWKNpvkI7Aj5yIF1PlR3iMJVXeOWUDorgJ0CYHuWA048Fnf511/UOhC5G3TygPi63QOD1aMU8cjpdQND1SfDXfoJSSCmN6D+FlvbZadlcAMIaFs+6Sr672omcBdg8fTQHOUM/AiVY383LwtDq/9j6W9OHBKdVp9Fxy/fRJ+9haZjTekBEHujakG8xes6EkTteQOWa06Wua+I31U6ym8uh1uiHSBqBoi1IRLP9U56+q6x6UTKWUHkpW7VJvh+U0m6folpQ2zMia2uRebi0uwG7jdZVJUy5qtfPVxPSECmiE70VPHnW5Xz/P08="
     file:
       - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
       - "${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
@@ -64,8 +64,7 @@ deploy:
       #condition: "$TRAVIS_TAG =~ ^(?:(?<major>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<minor>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<patch>(?:0|[1-9](?:(?:0|[1-9])+)*))(?:-(?<prerelease>(?:0|[1-9](?:(?:0|[1-9])+)*)*))?(?:[+](?<build>(?:0|[1-9](?:(?:0|[1-9])+)*)*))?)$"
   - provider: pages
     skip_cleanup: true
-    github_token:
-      secure: "UEsvVGh3SzlQRVVCjAy8XSYOxXpFQtN0BO1vBl2dmrK+7XDeNrzNaFwcW9P6+TuZqGY5+GAdc2GT0WZ0sBXWTU9Orjr1kBn24TCK/N8wPbybzb8+UQS5jUD8D0aOH2tXnTI2eslRPBhcOmrP+HMrJG/kz8jwVolbfheSKsmMhw+wdekUdetm4q1dhncDIN4DeZLGzTUqfjjevXA6cyIDPngu61Pekr5+MAcKu3Q2v+KHdLYym39uytT8sF70zMYPsvGRxv7P9kBiJ30869AVE4XeWyLYh/I3xDLQA1TMh3CvQjepXIhnKaqpLeI4Qji6vwo8nloaPBj9SL02iXFVtKlCy3UohlyAke+jaJo3HLy2KfE8FkYGFjTvq9HId+wGdVHtj2giRNJClUSfAoQgWwVImGawAUJEMn78uIRjEXEUjGcS4cyliVt7n6OCYjnT2Nsu2X4mNeiyFq5u7mc+YynGGt381vnsxWd3iC/AgMrijcgY2D9mgtTR7tOEervpnziojhjBRcI8C3LPmMxvyWUCeXSKjj0TR1RBsIx+k4A7qeapGYrwTbklp6Kuuj6iTSTv6KYgA8IR91c/DcGtkvNtJzSuh+C2mBgFVNH1z1WeS0903nTZg+kyIPYmnNu/PmRoJq/Wm+lSyKh9ZbR68bPoP09JV61OYgPKkXgZHb0="
+    github_token: $GH_PA_TOKEN
     branch: master
     local_dir: gh-pages/
     target_branch: gh-pages
