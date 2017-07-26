@@ -24,6 +24,7 @@
 # Sign a file with a private GPG keyring and password.
 #
 # Usage: deploy.sh
+#
 
 set -exuo pipefail
 
@@ -36,7 +37,7 @@ WORKING_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
 GIT_URL=`git config --get remote.origin.url`
 GIT_NAME=$(basename $GIT_URL .git)
-GIT_OWNER=$(basename $(dirname $GIT_URL))
+#GIT_OWNER=$(basename $(dirname $GIT_URL))
 
 PUBLIC_KEYRING="./${GIT_NAME}-publickeys.gpg"
 
@@ -65,9 +66,9 @@ if [[ $TRAVIS == "true" ]]; then
         cp --force "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING} .gpg)-${TRAVIS_TAG}.gpg"
         # Only replace the existing public keyring if it is changed.
         rsync --checksum "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING})"
-        echo "A the private keyring is ready to deploy to GitHub Pages."
+        echo "A GPG public keyring is ready to deploy to GitHub Pages."
       else
-        echo "The GPG public keyring ${PUBLIC_KEYRING} NOT found!."
+        echo "A GPG public keyring ${PUBLIC_KEYRING} NOT found!."
         exit 1
       fi
     popd
