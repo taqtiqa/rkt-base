@@ -17,6 +17,8 @@
 #If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 #
 
+set -exuo pipefail
+
 DEPLOY_DIR='./gh-pages'
 GH_REF=github.com/${TRAVIS_REPO_SLUG}.git
 

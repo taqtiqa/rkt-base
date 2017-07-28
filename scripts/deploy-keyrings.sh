@@ -62,7 +62,7 @@ if [[ ! $CI == "true" ]]; then
 fi
 
 if [[ $TRAVIS == "true" ]]; then
-  pushd ${WORKING_DIR}
+  pushd ${WORKING_DIR}/../
     # Copy PUBLIC_KEYRING to gh=pages folder ready to be deployed
     if [ -f ${PUBLIC_KEYRING} ]; then
       # Make a versioned backup of public keyrings - in case of emergency
