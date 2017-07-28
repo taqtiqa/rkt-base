@@ -45,6 +45,6 @@ upload_files() {
 }
 
 setup_git
-./scripts/deploy-keyrings.sh
+./scripts/deploy-keyrings.sh ${DEPLOY_DIR}
 commit_files
 upload_files gh-pages

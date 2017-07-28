@@ -45,7 +45,7 @@ after_success:
   - |
       if ([ ! -z "${TRAVIS_TAG}" ]) && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
         echo "This will run on tag triggered build!"
-        cat ./scripts/deploy-keyrings.sh | bash
+        cat ./scripts/push-gh-pages.sh | bash
       else
         echo "This will not run on tag triggered build!"
       fi

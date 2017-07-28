@@ -23,15 +23,19 @@
 #
 # Sign a file with a private GPG keyring and password.
 #
-# Usage: deploy-keyrings.sh
+# Usage: deploy-keyrings.sh <deploy-dir>
 #
 
 set -exuo pipefail
 
-if [[ $# -gt 0 ]] ; then
+if [[ $# -lt 1 ]] ; then
   echo "Usage: deploy-keyrings.sh"
   exit 1
 fi
+
+DEPLOY_DIR=$1
+
+mkdir -p "${DEPLOY_DIR}/keyrings"
 
 WORKING_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
@@ -62,9 +66,9 @@ if [[ $TRAVIS == "true" ]]; then
     # Copy PUBLIC_KEYRING to gh=pages folder ready to be deployed
     if [ -f ${PUBLIC_KEYRING} ]; then
       # Make a versioned backup of public keyrings - in case of emergency
-      cp --force "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING} .gpg)-${TRAVIS_TAG}.gpg"
+      cp --force "${PUBLIC_KEYRING}" "${DEPLOY_DIR}/keyrings/$(basename ${PUBLIC_KEYRING} .gpg)-${TRAVIS_TAG}.gpg"
       # Only replace the existing public keyring if it is changed.
-      rsync --checksum "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING})"
+      rsync --checksum "${PUBLIC_KEYRING}" "${DEPLOY_DIR}/keyrings/$(basename ${PUBLIC_KEYRING})"
       echo "A GPG public keyring is ready to deploy to GitHub Pages."
     else
       echo "A GPG public keyring ${PUBLIC_KEYRING} NOT found!."
