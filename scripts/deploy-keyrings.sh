@@ -43,7 +43,7 @@ GIT_URL=`git config --get remote.origin.url`
 GIT_NAME=$(basename $GIT_URL .git)
 #GIT_OWNER=$(basename $(dirname $GIT_URL))
 
-PUBLIC_KEYRING="./${GIT_NAME}-publickeys.gpg"
+PUBLIC_KEYRING="./${GIT_NAME}-publickeys.asc"
 
 function deployend() {
     export EXIT=$?
@@ -66,7 +66,7 @@ if [[ $TRAVIS == "true" ]]; then
     # Copy PUBLIC_KEYRING to gh=pages folder ready to be deployed
     if [ -f ${PUBLIC_KEYRING} ]; then
       # Make a versioned backup of public keyrings - in case of emergency
-      cp --force "${PUBLIC_KEYRING}" "${DEPLOY_DIR}/keyrings/$(basename ${PUBLIC_KEYRING} .gpg)-${TRAVIS_TAG}.gpg"
+      cp --force "${PUBLIC_KEYRING}" "${DEPLOY_DIR}/keyrings/$(basename ${PUBLIC_KEYRING} .asc)-${TRAVIS_TAG}.asc"
       # Only replace the existing public keyring if it is changed.
       rsync --checksum "${PUBLIC_KEYRING}" "${DEPLOY_DIR}/keyrings/$(basename ${PUBLIC_KEYRING})"
       echo "A GPG public keyring is ready to deploy to GitHub Pages."

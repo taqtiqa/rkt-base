@@ -26,7 +26,7 @@ notifications:
 
 env:
   global:
-    - secure: RRzSkAp27+Jr1NRHvdfJ51TNzz4YecpJ4nOMrspb9gEphzQbbyQq9rzKvteB7hkwupbwuu7TvYltQemGnPBc8kaFPSobMxyvpGRnwU1ot6OhTRlct/r/v6V05YZg/rpMELzaUcBtGyuc7W5dnpP5PLZJ+cjT1dnkYd8ZsPNvX57w6TWz6lswG+Ezhj5HJ83dbk2+6DUYzsiCYys2rCEv5fFsLYfCX2DlZ1H5sskYFCGRc/hZO2b91cEc6A9aIABp3QGk24r5Wk6nbcnA7AbK3EiwjaKZNLsT192DohVp//Y7b2QHoitjv5d61KcRFyWsCgd2lWjXNkCN8tUPRKmqj0g85jG8kWI2whPHyRzfhEXp71sd+DLGLPc7Lrgy6zDF+OFREjw1UeolvhDL3tnxhAK2K4bq3MmPKms/Su2yEZIm3aN7SmqaMAsVbV1rciRWiJ6AooBnaOWRD8Axkl91xvqA7sZxUXrQTjQfaJ0j2fjHw/BNqZ66i0KeOfd7dsbJY96I1PoMYVNdpPzqruFFplJBYbfnAKQTPFAnuFPJphzH91gt3D7n/A8ryplb1FpCGHWcA3LXK7j3x2GAjXLJeD3Vn7eopbbqMMA1QQwxYu0qNlTuWh25lK+LnBnUMINeHt7pRsa6eg4Jki0cLIFT510qhv91Kt+m/02+7MRZRLY=
+    - secure: KRkVbsBepMb7gG10l6ZzsH+/VzDRH8j4QLVWXSyuECMv36Hpu1GHoLPITz57qmwkgfrddZ8gABvjuvltXQISP+2QKc5+oD4DWTfYYl3wYFwc4L2Y4UpkWDE6pKLDrI/veFVGjOn2RVLP+Ensrk13SzCKDy/eBrQ9ty4kFrNldls1blsT5QVr6AyC2oi0Lufyk5h07QqCt55PXPto5VhTRQTHSsT9g46JnFQVfhfpchNmy6I9CNDFs6G9uWjwxKMjk+Mkev1h9aTCe3aCH4IA+kWB/EUsR6sr2QoObtMocg8ZvVKA2BZzB2ruXWd+nroZpSK3RGHSAjVPoshqqsjZu5rzs4PlZtRvHlds6iFq0Vj/ojq7lDS6WHJJaWtc4So6EsOzze3LuHCHZarZaw69ws5L/jHbtERGfiaW8SSHdCeu1A4aUklW9uZxkO+f1RAFMub6VSLlVzDPHavgpmyyFzh0YKnIcfNwScyM8YfAwe72GkR6QzvenzHSUQySygvBK/tuAbI4PUbhd1habpAqAT0cs05cw4J38+ADK2XuQawzlyH2PAcDqk0LB3pgo23fJxgCrhsDttxuP3ueG5kheyKciQcfFcQrq7zd2ix+c8LBU6KkAVT72SnYjFjWZbcR2OtqlG4endSZznYuL4ue4PCGLiJTYW8Xfju+hWIRHJI=
   matrix:
     - ARCH=amd64 ACI_NAME=$(basename $TRAVIS_REPO_SLUG)
 
@@ -36,7 +36,7 @@ before_install:
   - cat ./scripts/openssl.sh | sudo bash >/dev/null 2> >(tee -a before_install-stderr.log >&2)
 
 before_script:
-  - openssl aes-256-cbc -pass env:ACI_SECRET -in ./rkt-base-privatekeys.gpg.enc -out ./rkt-base-privatekeys.gpg -d -a
+  - openssl aes-256-cbc -pass env:ACI_SECRET -in rkt-base-privatekeys.asc.enc -out rkt-base-privatekeys.asc -d -a
 
 script:
   - cat ./rkt-base.sh | sudo bash >/dev/null 2> >(tee -a script-stderr.log >&2)
