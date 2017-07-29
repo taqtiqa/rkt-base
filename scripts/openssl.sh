@@ -28,7 +28,7 @@ pushd /tmp
   gpg --homedir ${TMP_GPG_HOME} --verify --trust-model always openssl-${OPENSSL_VER}.tar.gz.asc
   tar xzvf openssl-${OPENSSL_VER}.tar.gz
   pushd openssl-${OPENSSL_VER}
-    ./config -Wl,--enable-new-dtags,-rpath,'$(LIBRPATH)'
+    ./config -Wl,--enable-new-dtags,-rpath,'$(LIBRPATH)',no-afalgeng
     sudo make
     sudo make install
   popd
