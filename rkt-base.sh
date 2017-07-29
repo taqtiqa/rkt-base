@@ -120,7 +120,7 @@ function check_citool() {
   fi
 }
 
-trap buildend EXIT
+#trap buildend EXIT
 
 #if [[ -d ${ROOTFS} ]]; then
 #  echo "Remove existing rootfs directory"
