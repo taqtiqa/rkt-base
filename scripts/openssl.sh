@@ -20,19 +20,19 @@
 OPENSSL_VER='1.1.0f'
 OPENSSL_KEY='0E604491'
 pushd /tmp
-  TMP_GPG_HOME=$( mktemp -d -t 'XXXX' )
+  TMP_SSL_HOME=$( mktemp -d -t 'XXXX' )
   curl -o openssl-${OPENSSL_VER}.tar.gz https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz
   curl -o openssl-${OPENSSL_VER}.tar.gz.asc https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz.asc
   curl -o openssl-security.asc https://www.openssl.org/news/openssl-security.asc
-  gpg --no-tty --no-default-keyring --trust-model always --homedir ${TMP_GPG_HOME} --keyserver pgp.mit.edu --recv-key ${OPENSSL_KEY}
-  gpg --no-tty --trust-model always --homedir ${TMP_GPG_HOME} --verify openssl-${OPENSSL_VER}.tar.gz.asc
+  gpg --no-tty --no-default-keyring --trust-model always --homedir ${TMP_SSL_HOME} --keyserver pgp.mit.edu --recv-key ${OPENSSL_KEY}
+  gpg --no-tty --trust-model always --homedir ${TMP_SSL_HOME} --verify openssl-${OPENSSL_VER}.tar.gz.asc
   tar xzvf openssl-${OPENSSL_VER}.tar.gz
   pushd openssl-${OPENSSL_VER}
-    ./config -Wl,--enable-new-dtags,-rpath,'$(LIBRPATH)',no-afalgeng
+    ./config no-afalgeng -Wl,--enable-new-dtags,-rpath,'$(LIBRPATH)'
     sudo make
     sudo make install
   popd
   rm -rf openssl-${OPENSSL_VER}
-  rm -rf ${TMP_GPG_HOME}
+  rm -rf ${TMP_SSL_HOME}
 popd
 #openssl version -a
