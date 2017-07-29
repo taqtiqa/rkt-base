@@ -98,7 +98,7 @@ function buildend() {
 
 function buildcleanup() {
   # Dismount order matters
-  rry=("${ROOTFS}/dev/pts" "${ROOTFS}/dev" "${ROOTFS}/proc" "${ROOTFS}/sys")
+  rry=("${ROOTFS}/dev/pts" "${ROOTFS}/proc" "${ROOTFS}/sys" "${ROOTFS}/dev" )
   for mp in "${rry[@]}"
   do
     if mountpoint -q "${mp}"; then
@@ -138,7 +138,7 @@ do_third () {
   echo "... we get here?"
 }
 
-trap "buildend" EXIT
+trap "buildend" ERR
 
 #if [[ -d ${ROOTFS} ]]; then
 #  echo "Remove existing rootfs directory"
