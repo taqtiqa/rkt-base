@@ -31,6 +31,8 @@ set -exuo pipefail
 
 PRIVATE_KEYRING=$1
 PUBLIC_KEYRING=$2
+PRIVATE_KEY="$(basename ${PRIVATE_KEYRING} .gpg).asc"
+PUBLIC_KEY="$(basename ${PUBLIC_KEYRING} .gpg).asc"
 
 if [[ $# -lt 2 ]] ; then
   echo "Usage: gpg-init <private-keyring> <public-keyring>"
@@ -51,27 +53,35 @@ function gpginitend {
 
 trap gpginitend EXIT
 
-TMP_PRIVATE_KEYRING=./scripts/rkt.sec
-TMP_PUBLIC_KEYRING=./scripts/rkt.pub
+TMP_PRIVATE_KEYRING='./scripts/rkt.sec'
+TMP_PUBLIC_KEYRING='./scripts/rkt.pub'
 
 WORKING_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
-if [ ! -f ${PRIVATE_KEYRING} ]; then
-  echo "Signing GPG keyring ./${PRIVATE_KEYRING} not found!"
+if [ ! -f ${PRIVATE_KEY} ] || [ ! -f ${PRIVATE_KEYRING} ]; then
+  echo "Signing GPG secret keyring ${PRIVATE_KEYRING} or secret key ${PRIVATE_KEY} NOT found!"
   gpginitcleanup
-  echo "Creating GPG keyring ${PRIVATE_KEYRING}"
+  echo "Creating GPG secret keyring ${PRIVATE_KEYRING} and secret key ${PRIVATE_KEY}."
   pushd ${WORKING_DIR}
     pushd ..
-      # Create private and public key
-      gpg --batch --gen-key ./scripts/gpg-batch
-      KEY_ID=`gpg --import ${TMP_PUBLIC_KEYRING} 2>&1 | awk 'NR==1 { sub(/:/,"",$3) ; print $3 }'`
-      echo -e "trust\n5\ny\n" | gpg --command-fd 0 --edit-key ${KEY_ID}
-
+      # Create secret and public key
+      gpg --no-tty --batch --gen-key ./scripts/gpg-batch
+      # Amend KEY_ID selection to use --with-colon
+      #KEY_ID=`gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --import ${TMP_PRIVATE_KEYRING} --allow-secret-key-import  2>&1 | awk 'NR==1 { sub(/:/,"",$3) ; print $3 }'`
+      KEY_ID=`gpg --no-tty --no-default-keyring --keyring ${TMP_PUBLIC_KEYRING} --import ${TMP_PUBLIC_KEYRING} 2>&1 | awk 'NR==1 { sub(/:/,"",$3) ; print $3 }'`
+      echo -e "trust\n5\ny\n" | gpg --no-tty --no-default-keyring --trust-model always --command-fd 0 --keyring ${TMP_PUBLIC_KEYRING} --edit-key ${KEY_ID}
+      # Export secret key as armored text
+      gpg --no-tty --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --export-secret-key ${KEY_ID} >${PRIVATE_KEY}
+      # Export public key as armored text
+      gpg --no-tty --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --export ${KEY_ID} >${PUBLIC_KEY}
+      gpg --no-tty --no-default-keyring --armor --export-ownertrust > ownertrust-gpg.txt
       # Provide keyrings as requested
       mv ${TMP_PRIVATE_KEYRING} ${PRIVATE_KEYRING}
       mv ${TMP_PUBLIC_KEYRING} ${PUBLIC_KEYRING}
       chmod 400 ${PRIVATE_KEYRING}
       chmod 400 ${PUBLIC_KEYRING}
+      chmod 400 ${PRIVATE_KEY}
+      chmod 400 ${PUBLIC_KEY}
     popd
   popd
 fi

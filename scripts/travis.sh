@@ -23,8 +23,6 @@
 
 set -exuo pipefail
 
-BUILD_EMAIL=${BUILD_EMAIL:-$DEFAULT_BUILD_EMAIL}
-
 GIT_URL=`git config --get remote.origin.url`
 GIT_NAME=$(basename $GIT_URL .git)
 GIT_OWNER=$(basename $(dirname $GIT_URL))

@@ -4,7 +4,7 @@ Key-Length: 2048
 Subkey-Type: RSA
 Subkey-Length: 2048
 Name-Real: TAQTIQA LLC
-Name-Comment: ACI signing key
+Name-Comment: Rkt image signing key
 Name-Email: coders@taqtiqa.com
 Expire-Date: 0
 Passphrase: rkt

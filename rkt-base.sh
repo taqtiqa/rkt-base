@@ -17,77 +17,97 @@
 #If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 #
 
+# Usage:
+#   rkt-base.sh </rootfs/path>
+#
+
 set -eoux pipefail
 
-ACI_SUITE='hardy' # NB: Lower case - this is case sensitive
-ACI_ARTIFACTS_DIR=/tmp/${ACI_SUITE}
-
-DEFAULT_PACKAGES=language-pack-en-base,language-pack-en,ubuntu-keyring,debian-archive-keyring
-DEFAULT_COMPONENTS=main,universe,multiverse,restricted
 DEBOOTSTRAP=/usr/sbin/debootstrap
-DEFAULT_MIRROR=http://old-releases.ubuntu.com/ubuntu
-DEFAULT_VARIANT=minbase
-DEFAULT_ROOTFS=/tmp/rootfs
-DEFAULT_SUITE='xenial'
-DEFAULT_BUILD_ARTIFACTS_DIR=/tmp/artifacts
-DEFAULT_BUILD_VERSION='0.0.0-0' # Default to zero semantic version number
-DEFAULT_ORG='example.com'
-DEFAULT_SLUG='user/repo'
 
-MIRROR=${ACI_MIRROR:-$DEFAULT_MIRROR}
-ROOTFS=${1:-$DEFAULT_ROOTFS}
-PACKAGES=${ACI_PACKAGES:-$DEFAULT_PACKAGES}
-COMPONENTS=${ACI_COMPONENTS:-$DEFAULT_COMPONENTS}
-VARIANT=${ACI_VARIANT:-$DEFAULT_VARIANT}
-SUITE=${ACI_SUITE:-$DEFAULT_SUITE}
+ACI_ARCH='amd64'
+ACI_AUTHOR='TAQTIQA LLC'
+ACI_RELEASE='hardy' # NB: Lower case - this is case sensitive
+ACI_EMAIL='coders@taqtiqa.com'
 
-R_VERSION=${R_VERSION:-3.4.1}
-ACI_NAME=$(basename ${TRAVIS_REPO_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
-ACI_ORG='taqtiqa.io'
-dist='hardy'
-arch='amd64'
-mirror='http://archive.ubuntu.com/ubuntu'
-out=/tmp/r-aci # $(mktemp -d)
+CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
 
-BUILD_AUTHOR='TAQTIQA LLC'
-BUILD_EMAIL='coders@taqtiqa.com'
-BUILD_ORG=${ACI_ORG:-$DEFAULT_ORG}
-BUILD_DATE=${BUILD_DATE:-}
-BUILD_ARTIFACTS_DIR=${ACI_ARTIFACTS_DIR:-$DEFAULT_BUILD_ARTIFACTS_DIR}
-BUILD_VERSION=${TRAVIS_TAG:-$DEFAULT_BUILD_VERSION}
-BUILD_SLUG=${TRAVIS_REPO_SLUG:-$DEFAULT_SLUG}
+CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
 
-LC_ALL=en_US.UTF-8
-LANG=en_US.UTF-8
-TERM=xterm
+DEFAULT_BUILD_ARCH='amd64'
+DEFAULT_BUILD_VERSION='0.0.0-0'
+DEFAULT_COMPONENTS='main,universe,multiverse,restricted'
+DEFAULT_GUEST_PACKAGES='apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
+DEFAULT_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu' #'http://old-releases.ubuntu.com/ubuntu'
+DEFAULT_HOST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
+DEFAULT_VARIANT='minbase'
+DEFAULT_ROOTFS='/tmp/rootfs'
+DEFAULT_RELEASE='hardy'
+DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/artifacts'}
+DEFAULT_SLUG=${CI_SLUG:-'example.com/image-name'}
+DEFAULT_ORG=$(dirname ${DEFAULT_SLUG})
+DEFAULT_ACI_NAME=$(basename ${DEFAULT_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
+DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/release'}
+DEFAULT_BUILD_EMAIL='no-reply@example.com'
+DEFAULT_BUILD_AUTHOR='Example LLC'
+
+ROOTFS=${1:-${DEFAULT_ROOTFS}}
+CI_BUILD_VERSION=${TRAVIS_TAG:-${DEFAULT_BUILD_VERSION}}
+CI_SLUG=${TRAVIS_REPO_SLUG:-${DEFAULT_SLUG}}
+
+ACI_NAME=$(basename ${CI_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
+ACI_ORG=$(dirname ${CI_SLUG})
+
+BUILD_ARCH=${ACI_ARCH:-${DEFAULT_BUILD_ARCH}}
+BUILD_ACI_NAME=${ACI_NAME:-${DEFAULT_ACI_NAME}}
+BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-${DEFAULT_BUILD_ARTIFACTS_DIR}}
+BUILD_AUTHOR=${ACI_AUTHOR:-${DEFAULT_BUILD_AUTHOR}}
+BUILD_COMPONENTS=${ACI_COMPONENTS:-${DEFAULT_COMPONENTS}}
+BUILD_EMAIL=${ACI_EMAIL:-${DEFAULT_BUILD_EMAIL}}
+BUILD_ORG=${ACI_ORG:-${DEFAULT_ORG}}
+BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
+BUILD_GUEST_PACKAGES=${ACI_PACKAGES:-${DEFAULT_GUEST_PACKAGES}}
+BUILD_GUEST_PACKAGE_MIRROR=${CI_PACKAGE_MIRROR:-${DEFAULT_GUEST_PACKAGE_MIRROR}}
+BUILD_VERSION=${CI_BUILD_VERSION:-${DEFAULT_BUILD_VERSION}}
+BUILD_DATE=${BUILD_DATE:-$(date --utc +%FT%TZ)} # ISO8601
+BUILD_SLUG=${DEFAULT_SLUG}
+BUILD_VARIANT=${ACI_VARIANT:-${DEFAULT_VARIANT}}
+BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
+
+BUILD_FILE=${BUILD_ACI_NAME}-${BUILD_VERSION}-linux-${BUILD_ARCH}.aci
+BUILD_ARTIFACTS_DIR='.'
+BUILD_ARTIFACT=${BUILD_ARTIFACTS_DIR}/${BUILD_FILE}
+
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LANG=C  # https://serverfault.com/questions/350876/setlocale-error-with-chroot
+export TERM=linux
+export DEBIAN_FRONTEND='noninteractive'
 
 ACBUILD='/bin/acbuild --debug'
 ACBUILD_RUN="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
-MODIFY=${MODIFY:-""}
-FLAGS=${FLAGS:-""}
-IMG_NAME="${BUILD_ORG}/${ACI_NAME}"
-# ACI format: {name}-{version}-{os}-{arch}.{ext}
-ACI_FILE=${ACI_NAME}-${BUILD_VERSION}-linux-${arch}.aci
-ARTIFACTS_DIR='.'
-ACI_ARTIFACT=${ARTIFACTS_DIR}/${ACI_FILE}
 
-PRIVATE_KEY="./${ACI_NAME}-signingkey.pem"
-PUBLIC_KEY="./${ACI_NAME}-signingkey-public.pem"
-ACI_SIG="${ARTIFACTS_DIR}/${ACI_FILE}.sha256"
+BUILD_NAME="${BUILD_ORG}/${BUILD_ACI_NAME}"
 
 function buildend() {
-    export EXIT=$?
-    rry=("$ROOTFS/proc" "$ROOTFS/dev")
-    for mp in "${rry[@]}"
-    do
-      if mountpoint -q "$mp"; then
-        echo "$mp is a mountpoint"
-        umount $mp
-      else
-        echo "$mp is not a mountpoint"
-      fi
-    done
-    exit $EXIT
+  export EXIT=$?
+  buildcleanup
+  ${ACBUILD}  end
+  exit $EXIT
+}
+
+function buildcleanup() {
+  # Dismount order matters
+  rry=("${ROOTFS}/dev/pts" "${ROOTFS}/dev" "${ROOTFS}/proc" "${ROOTFS}/sys")
+  for mp in "${rry[@]}"
+  do
+    if mountpoint -q "${mp}"; then
+      echo "$mp is a mountpoint"
+      umount -lf "${mp}"
+    else
+      echo "${mp} is not a mountpoint"
+    fi
+  done
 }
 
 function check_citool() {
@@ -102,117 +122,148 @@ function check_citool() {
 
 trap buildend EXIT
 
+#if [[ -d ${ROOTFS} ]]; then
+#  echo "Remove existing rootfs directory"
+#  rm -rf ${ROOTFS}
+#fi
+
 if [ "$EUID" -ne 0 ]; then
-    echo "This script uses functionality which requires root privileges"
-    exit 1
+  echo "This script uses functionality which requires root privileges"
+  exit 1
 fi
 
-type $DEBOOTSTRAP >/dev/null
+type ${DEBOOTSTRAP} >/dev/null
 if [ $? -ne 0 ]; then
-    echo "debootstrap not installed"
-    exit 1
+  echo "debootstrap not installed"
+  exit 1
 fi
 
-$DEBOOTSTRAP --include $PACKAGES --components $COMPONENTS --variant $VARIANT $SUITE $ROOTFS $MIRROR
+if [[ ! -d ${ROOTFS} ]]; then
+  ${DEBOOTSTRAP} --include ${BUILD_GUEST_PACKAGES} --components ${BUILD_COMPONENTS} --variant ${BUILD_VARIANT} ${BUILD_RELEASE} ${ROOTFS} ${BUILD_GUEST_PACKAGE_MIRROR}
 
-cat << EOF > ${ROOTFS}/etc/apt/sources.list
+  cat << EOF > ${ROOTFS}/etc/apt/sources.list
 ## Uncomment the following two lines to fetch updated software from the network
-deb http://old-releases.ubuntu.com/ubuntu ${SUITE} main restricted
-deb-src http://old-releases.ubuntu.com/ubuntu ${SUITE} main restricted
+deb ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE} main restricted
+deb-src ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE} main restricted
 
-## Uncomment the following two lines to fetch major bug fix updates produced
-## after the final release of the distribution.
-deb http://old-releases.ubuntu.com/ubuntu ${SUITE}-updates main restricted
-deb-src http://old-releases.ubuntu.com/ubuntu ${SUITE}-updates main restricted
+deb ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE}-updates main restricted
+deb-src ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE}-updates main restricted
 
-## Uncomment the following two lines to add software from the 'universe'
-## repository.
-## N.B. software from this repository is ENTIRELY UNSUPPORTED by the Ubuntu
-## team, and may not be under a free licence. Please satisfy yourself as to
-## your rights to use the software. Also, please note that software in
-## universe WILL NOT receive any review or updates from the Ubuntu security
-## team.
-deb http://old-releases.ubuntu.com/ubuntu ${SUITE} universe
-deb-src http://old-releases.ubuntu.com/ubuntu ${SUITE} universe
+deb ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE} universe
+deb-src ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE} universe
 
-deb http://old-releases.ubuntu.com/ubuntu ${SUITE}-security main restricted
-deb-src http://old-releases.ubuntu.com/ubuntu ${SUITE}-security main restricted
+deb ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE}-security main restricted
+deb-src ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE}-security main restricted
 
-deb http://old-releases.ubuntu.com/ubuntu ${SUITE}-security universe
-deb-src http://old-releases.ubuntu.com/ubuntu ${SUITE}-security universe
+deb ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE}-security universe
+deb-src ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE}-security universe
 
-deb http://old-releases.ubuntu.com/ubuntu ${SUITE} multiverse
-deb-src http://old-releases.ubuntu.com/ubuntu ${SUITE} multiverse
+deb ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE} multiverse
+deb-src ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE} multiverse
 
-deb http://old-releases.ubuntu.com/ubuntu ${SUITE}-backports main restricted universe multiverse
+deb ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE}-backports main restricted universe multiverse
 
-#
 # PPA repositories without having to install more cruft
-deb http://ppa.launchpad.net/dns/gnu/ubuntu ${SUITE} main
-deb-src http://ppa.launchpad.net/dns/gnu/ubuntu ${SUITE} main
+deb http://ppa.launchpad.net/dns/gnu/ubuntu ${BUILD_RELEASE} main
+deb-src http://ppa.launchpad.net/dns/gnu/ubuntu ${BUILD_RELEASE} main
 EOF
 
-cat << EOF > ${ROOTFS}/etc/apt/apt.conf.d/01lean
+  cat << EOF > ${ROOTFS}/etc/apt/apt.conf.d/01lean
 APT::Install-Suggests "0";
 APT::Install-Recommends "0";
 APT::AutoRemove::SuggestsImportant "false";
 APT::AutoRemove::RecommendsImportant "false";
+APT::Get::Assume-Yes "true";
+APT::Get::Show-Upgraded "true";
+APT::Quiet "true";
+DPkg::Options {"--force-confdef";"--force-confmiss";"--force-confold"};
+DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
+Dir::Etc::SourceList "/etc/apt/sources.list";
 EOF
 
-# Consider using schroot if build troubles persist
-# https://github.com/neurodebian/travis-chroots/blob/master/tools/travis_chroot
+  # Consider using schroot if build trouble persists
+  # https://github.com/neurodebian/travis-chroots/blob/master/tools/travis_chroot
+  ##if [[ ! -z "${CI}" ]]; then
+  #  echo "Mounting /proc in chroot... "
+  #  if [ ! -d "${ROOTFS}/proc" ] ; then
+  #      mkdir -p ${ROOTFS}/proc
+  #      echo "Created ${ROOTFS}/proc"
+  #  fi
+  #  mount -t proc -o nosuid,noexec,nodev proc ${ROOTFS}/proc
+  #  echo "OK"
+  #  echo "Mounting /sys in chroot... "
+  #  if [ ! -d "${ROOTFS}/sys" ] ; then
+  #      mkdir -p ${ROOTFS}/sys
+  #      echo "Created ${ROOTFS}/sys"
+  #  fi
+  #  mount -t sysfs -o nosuid,noexec,nodev sysfs ${ROOTFS}/sys
+  #  echo "OK"
+  #  echo "Mounting /dev/ and /dev/pts in chroot... "
+  #    mkdir -p -m 755 ${ROOTFS}/dev/pts
+  #    mount -t devtmpfs -o mode=0755,nosuid devtmpfs ${ROOTFS}/dev
+  #    mount -t devpts -o gid=5,mode=620 devpts ${ROOTFS}/dev/pts
+  #  echo "OK"
+  ##fi
+  for i in dev proc sys dev/pts
+  do
+      mount -o bind /$i ${ROOTFS}/$i
+  done
+  chroot ${ROOTFS} echo 'debconf debconf/frontend select Noninteractive' | chroot ${ROOTFS} debconf-set-selections
+  chroot ${ROOTFS} dpkg-reconfigure debconf
+  chroot ${ROOTFS} echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
+  chroot ${ROOTFS} dpkg-reconfigure locales
+  chroot ${ROOTFS} apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B187F352479B857B
+  chroot ${ROOTFS} apt-get -qq update
+  chroot ${ROOTFS} apt-get -y dist-upgrade
+  chroot ${ROOTFS} apt-get --purge -y autoremove
+  chroot ${ROOTFS} apt-get --purge -y autoremove
+  chroot ${ROOTFS} apt-get clean
+  #chroot ${ROOTFS} echo 'debconf debconf/frontend select Teletype' | chroot ${ROOTFS} debconf-set-selections
+  #chroot ${ROOTFS} dpkg-reconfigure debconf
+  # Cleanup as ACBuild expects.  Otherwise $ACBUILD begin ${ROOTFS} complains:
+  #   $ begin: build already in progress in this working dir
+  # See:
+  # - https://github.com/containers/build/issues/167
+  # - https://askubuntu.com/questions/551195/scripting-chroot-how-to
+  for i in dev/pts proc sys dev
+  do
+      if mountpoint -q "${ROOTFS}/${i}"; then
+        echo "${ROOTFS}/${i} is a mountpoint"
+        umount -lf ${ROOTFS}/$i
+        #rm -rf ${ROOTFS}/$i
+      else
+        echo "${ROOTFS}/${i} is not a mountpoint"
+      fi
+  done
+fi
 
-export LANG=C  # https://serverfault.com/questions/350876/setlocale-error-with-chroot
-chroot $ROOTFS mount -t proc /proc /proc
-chroot $ROOTFS echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
-chroot $ROOTFS dpkg-reconfigure locales
-chroot $ROOTFS apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B187F352479B857B
-chroot $ROOTFS apt-get -qq update
-chroot $ROOTFS apt-get -y dist-upgrade
-chroot $ROOTFS apt-get --purge -y autoremove
-chroot $ROOTFS apt-get --purge -y autoremove
-chroot $ROOTFS apt-get clean
-umount $ROOTFS/proc
-
-echo "Finished ${SUITE} rootfs build."
+echo "Finished ${BUILD_RELEASE} rootfs build."
 
 # Start the build with ACI bootstrapped above
-$ACBUILD begin /tmp/rootfs
+${ACBUILD} begin ${ROOTFS}
 
 # Name the ACI
-$ACBUILD set-name ${IMG_NAME}
+${ACBUILD} set-name ${BUILD_NAME}
 
-# Based on TAQTIQA Linux base image of Ubuntu (12 MB)
+# Based on TAQTIQA Linux base image of Ubuntu (~53 MB)
 # rkt trust --prefix=taqtiqa.io/rkt-base
-#$ACBUILD dep add taqtiqa.io/rkt-base:0.0.1.1
+#${ACBUILD} dep add taqtiqa.io/rkt-base:0.0.0-0
 
-$ACBUILD label add version ${BUILD_VERSION}
-$ACBUILD label add arch amd64
-$ACBUILD label add os linux
-$ACBUILD annotation add authors "${BUILD_AUTHOR} <${BUILD_EMAIL}>"
+${ACBUILD} label add version ${BUILD_VERSION}
+${ACBUILD} label add arch amd64
+${ACBUILD} label add os linux
+${ACBUILD} annotation add authors "${BUILD_AUTHOR} <${BUILD_EMAIL}>"
 
-$ACBUILD set-user 0
-$ACBUILD set-group 0
-$ACBUILD environment add OS_VERSION ${dist}
+${ACBUILD} set-user 0
+${ACBUILD} set-group 0
+${ACBUILD} environment add OS_VERSION ${BUILD_RELEASE}
 
-# Using chroot above are more robust than `acbuild run` or `acbuild-chroot`
-#$ACBUILD_RUN --cmd 'apt-get' --args '--purge -y autoremove'
-#$ACBUILD_RUN --cmd 'apt-get' --args 'clean'
+echo "Write the Container Image..."
+${ACBUILD} write --overwrite ${BUILD_ARTIFACT}
+echo "Created Container Image ${BUILD_ARTIFACT}."
 
-if [ -z "$MODIFY" ]; then
-  echo "Write the Container Image..."
-  $ACBUILD write --overwrite ${ACI_ARTIFACT}
-  echo "Created Container Image ${ACI_ARTIFACT}."
-fi
+echo "Sign the Container Image..."
+./scripts/sign.sh ${BUILD_ARTIFACT}
+echo "Signed the Container Image..."
 
-
-if [ -f ./${ACI_NAME}-privatekeys.gpg ]; then
-  # Sign ACI
-  ./scripts/sign.sh ${ACI_ARTIFACT}
-fi
-
-if [ -e ${out}/tmp/ ]; then
-  rm -rf ${out}/tmp/*
-fi
-
-$ACBUILD end
+${ACBUILD} end

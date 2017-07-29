@@ -72,7 +72,7 @@ pushd ${WORKING_DIR}
       echo "Downloading..."
       ./scripts/travis.sh
       echo "GPG signing..."
-      ./scripts/sign-once.sh TRAVIS_PUBLIC_KEY_PREFIX TRAVIS_PUBLIC_KEY
+      ./scripts/sign-once.sh ${TRAVIS_PUBLIC_KEY_PREFIX} ${TRAVIS_PUBLIC_KEY}
     fi
     if [ ! -f ${filename}.enc ]; then
       echo "Encrypted file ${filename}.enc not found!"
