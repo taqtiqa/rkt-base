@@ -138,7 +138,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-./scripts/build-rootfs.sh
+(source ./scripts/build-rootfs.sh)
 
 echo 'Display installed acbuild version'
 ${ACBUILD} version
