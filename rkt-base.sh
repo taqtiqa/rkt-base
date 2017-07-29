@@ -93,7 +93,7 @@ function buildend() {
   export EXIT=$?
   buildcleanup
   #${ACBUILD}  end
-  exit $EXIT
+  [[ $? -ne 0 ]] && exit $EXIT # Exit if non-zero exit code
 }
 
 function buildcleanup() {
