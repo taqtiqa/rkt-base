@@ -140,6 +140,9 @@ fi
 
 ./scripts/build-rootfs.sh
 
+echo 'Display installed acbuild version'
+${ACBUILD} version
+
 # Start the build with ACI bootstrapped above
 ${ACBUILD} begin ${ROOTFS}
 
