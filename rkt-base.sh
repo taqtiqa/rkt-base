@@ -120,7 +120,25 @@ function check_citool() {
   fi
 }
 
-#trap buildend EXIT
+do_first () {
+  echo "Prove..."
+  trap "do_third" EXIT
+  source ./scripts/build-rootfs.sh
+  do_third
+}
+#do_second () {
+#  echo "ho lanciato il secondo"
+#  trap "do_third" EXIT
+#  source ./third.sh
+#  do_third
+#}
+do_third () {
+  trap "buildend" EXIT
+  #trap - EXIT
+  echo "... we get here?"
+}
+
+trap "buildend" EXIT
 
 #if [[ -d ${ROOTFS} ]]; then
 #  echo "Remove existing rootfs directory"
@@ -138,7 +156,8 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-(source ./scripts/build-rootfs.sh)
+#(source ./scripts/build-rootfs.sh)
+do_first
 
 echo 'Display installed acbuild version'
 ${ACBUILD} version
