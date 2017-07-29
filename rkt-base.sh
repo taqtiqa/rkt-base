@@ -92,7 +92,7 @@ BUILD_NAME="${BUILD_ORG}/${BUILD_ACI_NAME}"
 function buildend() {
   export EXIT=$?
   buildcleanup
-  ${ACBUILD}  end
+  #${ACBUILD}  end
   exit $EXIT
 }
 
@@ -266,4 +266,4 @@ echo "Sign the Container Image..."
 ./scripts/sign.sh ${BUILD_ARTIFACT}
 echo "Signed the Container Image..."
 
-#${ACBUILD} end
+${ACBUILD} end
