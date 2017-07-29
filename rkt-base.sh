@@ -266,4 +266,4 @@ echo "Sign the Container Image..."
 ./scripts/sign.sh ${BUILD_ARTIFACT}
 echo "Signed the Container Image..."
 
-${ACBUILD} end
+#${ACBUILD} end
