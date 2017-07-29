@@ -23,60 +23,60 @@
 
 set -eoux pipefail
 
-DEBOOTSTRAP=/usr/sbin/debootstrap
+export DEBOOTSTRAP=/usr/sbin/debootstrap
 
-ACI_ARCH='amd64'
-ACI_AUTHOR='TAQTIQA LLC'
-ACI_RELEASE='hardy' # NB: Lower case - this is case sensitive
-ACI_EMAIL='coders@taqtiqa.com'
+export ACI_ARCH='amd64'
+export ACI_AUTHOR='TAQTIQA LLC'
+export ACI_RELEASE='hardy' # NB: Lower case - this is case sensitive
+export ACI_EMAIL='coders@taqtiqa.com'
 
-CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
+export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
 
-CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
+export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
 
-DEFAULT_BUILD_ARCH='amd64'
-DEFAULT_BUILD_VERSION='0.0.0-0'
-DEFAULT_COMPONENTS='main,universe,multiverse,restricted'
-DEFAULT_GUEST_PACKAGES='apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
-DEFAULT_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu' #'http://old-releases.ubuntu.com/ubuntu'
-DEFAULT_HOST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
-DEFAULT_VARIANT='minbase'
-DEFAULT_ROOTFS='/tmp/rootfs'
-DEFAULT_RELEASE='hardy'
-DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/artifacts'}
-DEFAULT_SLUG=${CI_SLUG:-'example.com/image-name'}
-DEFAULT_ORG=$(dirname ${DEFAULT_SLUG})
-DEFAULT_ACI_NAME=$(basename ${DEFAULT_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
-DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/release'}
-DEFAULT_BUILD_EMAIL='no-reply@example.com'
-DEFAULT_BUILD_AUTHOR='Example LLC'
+export DEFAULT_BUILD_ARCH='amd64'
+export DEFAULT_BUILD_VERSION='0.0.0-0'
+export DEFAULT_COMPONENTS='main,universe,multiverse,restricted'
+export DEFAULT_GUEST_PACKAGES='apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
+export DEFAULT_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu' #'http://old-releases.ubuntu.com/ubuntu'
+export DEFAULT_HOST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
+export DEFAULT_VARIANT='minbase'
+export DEFAULT_ROOTFS='/tmp/rootfs'
+export DEFAULT_RELEASE='hardy'
+export DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/artifacts'}
+export DEFAULT_SLUG=${CI_SLUG:-'example.com/image-name'}
+export DEFAULT_ORG=$(dirname ${DEFAULT_SLUG})
+export DEFAULT_ACI_NAME=$(basename ${DEFAULT_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
+export DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/release'}
+export DEFAULT_BUILD_EMAIL='no-reply@example.com'
+export DEFAULT_BUILD_AUTHOR='Example LLC'
 
-ROOTFS=${1:-${DEFAULT_ROOTFS}}
-CI_BUILD_VERSION=${TRAVIS_TAG:-${DEFAULT_BUILD_VERSION}}
-CI_SLUG=${TRAVIS_REPO_SLUG:-${DEFAULT_SLUG}}
+export ROOTFS=${1:-${DEFAULT_ROOTFS}}
+export CI_BUILD_VERSION=${TRAVIS_TAG:-${DEFAULT_BUILD_VERSION}}
+export CI_SLUG=${TRAVIS_REPO_SLUG:-${DEFAULT_SLUG}}
 
-ACI_NAME=$(basename ${CI_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
-ACI_ORG=$(dirname ${CI_SLUG})
+export ACI_NAME=$(basename ${CI_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
+export ACI_ORG=$(dirname ${CI_SLUG})
 
-BUILD_ARCH=${ACI_ARCH:-${DEFAULT_BUILD_ARCH}}
-BUILD_ACI_NAME=${ACI_NAME:-${DEFAULT_ACI_NAME}}
-BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-${DEFAULT_BUILD_ARTIFACTS_DIR}}
-BUILD_AUTHOR=${ACI_AUTHOR:-${DEFAULT_BUILD_AUTHOR}}
-BUILD_COMPONENTS=${ACI_COMPONENTS:-${DEFAULT_COMPONENTS}}
-BUILD_EMAIL=${ACI_EMAIL:-${DEFAULT_BUILD_EMAIL}}
-BUILD_ORG=${ACI_ORG:-${DEFAULT_ORG}}
-BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
-BUILD_GUEST_PACKAGES=${ACI_PACKAGES:-${DEFAULT_GUEST_PACKAGES}}
-BUILD_GUEST_PACKAGE_MIRROR=${CI_PACKAGE_MIRROR:-${DEFAULT_GUEST_PACKAGE_MIRROR}}
-BUILD_VERSION=${CI_BUILD_VERSION:-${DEFAULT_BUILD_VERSION}}
-BUILD_DATE=${BUILD_DATE:-$(date --utc +%FT%TZ)} # ISO8601
-BUILD_SLUG=${DEFAULT_SLUG}
-BUILD_VARIANT=${ACI_VARIANT:-${DEFAULT_VARIANT}}
-BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
+export BUILD_ARCH=${ACI_ARCH:-${DEFAULT_BUILD_ARCH}}
+export BUILD_ACI_NAME=${ACI_NAME:-${DEFAULT_ACI_NAME}}
+export BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-${DEFAULT_BUILD_ARTIFACTS_DIR}}
+export BUILD_AUTHOR=${ACI_AUTHOR:-${DEFAULT_BUILD_AUTHOR}}
+export BUILD_COMPONENTS=${ACI_COMPONENTS:-${DEFAULT_COMPONENTS}}
+export BUILD_EMAIL=${ACI_EMAIL:-${DEFAULT_BUILD_EMAIL}}
+export BUILD_ORG=${ACI_ORG:-${DEFAULT_ORG}}
+export BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
+export BUILD_GUEST_PACKAGES=${ACI_PACKAGES:-${DEFAULT_GUEST_PACKAGES}}
+export BUILD_GUEST_PACKAGE_MIRROR=${CI_PACKAGE_MIRROR:-${DEFAULT_GUEST_PACKAGE_MIRROR}}
+export BUILD_VERSION=${CI_BUILD_VERSION:-${DEFAULT_BUILD_VERSION}}
+export BUILD_DATE=${BUILD_DATE:-$(date --utc +%FT%TZ)} # ISO8601
+export BUILD_SLUG=${DEFAULT_SLUG}
+export BUILD_VARIANT=${ACI_VARIANT:-${DEFAULT_VARIANT}}
+export BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
 
-BUILD_FILE=${BUILD_ACI_NAME}-${BUILD_VERSION}-linux-${BUILD_ARCH}.aci
-BUILD_ARTIFACTS_DIR='.'
-BUILD_ARTIFACT=${BUILD_ARTIFACTS_DIR}/${BUILD_FILE}
+export BUILD_FILE=${BUILD_ACI_NAME}-${BUILD_VERSION}-linux-${BUILD_ARCH}.aci
+export BUILD_ARTIFACTS_DIR='.'
+export BUILD_ARTIFACT=${BUILD_ARTIFACTS_DIR}/${BUILD_FILE}
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
@@ -84,10 +84,10 @@ export LANG=C  # https://serverfault.com/questions/350876/setlocale-error-with-c
 export TERM=linux
 export DEBIAN_FRONTEND='noninteractive'
 
-ACBUILD='/bin/acbuild --debug'
-ACBUILD_RUN="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
+export ACBUILD='/bin/acbuild --debug'
+export ACBUILD_RUN="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
 
-BUILD_NAME="${BUILD_ORG}/${BUILD_ACI_NAME}"
+export BUILD_NAME="${BUILD_ORG}/${BUILD_ACI_NAME}"
 
 function buildend() {
   export EXIT=$?
