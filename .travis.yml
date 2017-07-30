@@ -31,6 +31,9 @@ env:
     - ARCH=amd64 ACI_NAME=$(basename $TRAVIS_REPO_SLUG)
 
 before_install:
+  - sudo chown travis:travis ~/.gnupg/gpg.conf
+  - sudo chgrp -R travis ~/.gnupg
+  - chmod 0600 ~/.gnupg/gpg.conf
   - git clone https://github.com/taqtiqa/ci.git
   - cat ci/travis/install-acbuild.sh | sudo bash >> >(tee -a before_install-stdout.log) 2> >(tee -a before_install-stderr.log >&2)
   - cat ./scripts/openssl.sh | sudo bash >/dev/null 2> >(tee -a before_install-stderr.log >&2)
