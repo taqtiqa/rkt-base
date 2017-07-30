@@ -15,6 +15,9 @@
 *-signingkey.pem
 *-privatekeys.gpg
 *-privatekeys.asc
+*-privatekeyring.gpg
+*-publickeyring.gpg
+
 travis-todo.yml
 
 # Used by dotenv library to load environment variables.

@@ -43,16 +43,17 @@ function signonceend() {
       rm -f ${publickey}
       rm -f ${signature}
     fi
-    rm -f ${privatekeyring}
-    rm -f ${publickeyring}
+    rm -f ${TMP_PRIVATE_KEYRING}
+    rm -f ${TMP_PUBLIC_KEYRING}
     exit $EXIT
 }
 
 trap signonceend EXIT
 
+TMP_PRIVATE_KEYRING=./scripts/rkt.sec
+TMP_PUBLIC_KEYRING=./scripts/rkt.pub
+
 publickey=./${prefix}-signoncekey-public.gpg
-privatekeyring=./scripts/rkt.sec
-publickeyring=./scripts/rkt.pub
 signature=${filename}.asc
 
 dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
@@ -61,28 +62,23 @@ pushd ${dir}
   pushd ..
     # Create private and public keys
     gpg --batch --gen-key ./scripts/gpg-batch
-    id=`gpg --import ${publickeyring} 2>&1 | awk 'NR==1 { sub(/:/,"",$3) ; print $3 }'`
-    echo -e "trust\n5\ny\n" | gpg --command-fd 0 --edit-key ${id}
+    KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --list-keys --with-colons|grep pub|cut -d':' -f5)
+    echo -e "trust\n5\ny\n" | gpg --command-fd 0 --edit-key ${KEY_ID}
 
     # Export public key
     gpg --no-default-keyring --armor \
-    --secret-keyring ${privatekeyring} --keyring ${publickeyring} \
-    --export ${id} >${publickey}
-
-#    # Export public key
-#    gpg --no-default-keyring --armor \
-#    --secret-keyring ${privatekeyring} --keyring ${publickeyring} \
-#    --export ${id} >${publickey}
+    --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} \
+    --export ${KEY_ID} >${publickey}
 
     # Sign file
-    echo -e "rkt\n"|gpg --passphrase-fd 0 --trust-model always --no-default-keyring --armor --secret-keyring ${privatekeyring} --keyring ${publickeyring} --output ${signature} --detach-sig ${filename}
+    echo -e "rkt\n"|gpg --passphrase-fd 0 --trust-model always --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --output ${signature} --detach-sig ${filename}
 
     # Verify file
     gpg --trust-model always --no-default-keyring \
-    --secret-keyring ${privatekeyring} --keyring ${publickeyring} \
+    --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} \
     --verify ${signature} ${filename}
 
-    rm -f ${privatekeyring}
-    rm -f ${publickeyring}
+    rm -f ${TMP_PRIVATE_KEYRING}
+    rm -f ${TMP_PUBLIC_KEYRING}
   popd
 popd

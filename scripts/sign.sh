@@ -37,6 +37,7 @@ if [[ $# -lt 1 ]] ; then
 fi
 
 SIGNATURE="${filename}.asc"
+TMP_GPG_HOME=$( mktemp -d -t 'XXXX' )
 
 if [ -f ${SIGNATURE} ]; then
   echo "${SIGNATURE} exists. Exiting."
@@ -54,11 +55,11 @@ GIT_URL=`git config --get remote.origin.url`
 GIT_NAME=$(basename $GIT_URL .git)
 GIT_OWNER=$(basename $(dirname $GIT_URL))
 
-PRIVATE_KEYRING="./${GIT_NAME}-privatekeys.gpg"
-PUBLIC_KEYRING="./${GIT_NAME}-publickeys.gpg"
+TMP_PRIVATE_KEYRING="${TMP_GPG_HOME}/${GIT_NAME}-privatekeys.gpg"
+TMP_PUBLIC_KEYRING="${TMP_GPG_HOME}/${GIT_NAME}-publickeys.gpg"
 
-PRIVATE_KEY="$(basename ${PRIVATE_KEYRING} .gpg).asc"
-PUBLIC_KEY="$(basename ${PUBLIC_KEYRING} .gpg).asc"
+PRIVATE_KEY="./$(basename ${TMP_PRIVATE_KEYRING} .gpg).asc"
+PUBLIC_KEY="./$(basename ${TMP_PUBLIC_KEYRING} .gpg).asc"
 
 PRIVATE_KEY_ENC="${PRIVATE_KEY}.enc"
 
@@ -68,6 +69,9 @@ function signend() {
       echo "Abnormal end."
     fi
     rm -f ./travis-ca.cert
+    rm -f ${TMP_PRIVATE_KEYRING}
+    rm -f ${TMP_PUBLIC_KEYRING}
+
     exit $EXIT
 }
 
@@ -79,29 +83,30 @@ pushd ${WORKING_DIR}
       if [ ! -f ${PRIVATE_KEY_ENC} ]; then
         echo "The encrypted private keyring is missing - somehow!"
         # Encrypt for Travis private key and keyring if unencrypted.
-        ./scripts/travis-encrypt-file.sh ${PRIVATE_KEYRING}
+        #./scripts/travis-encrypt-file.sh ${PRIVATE_KEYRING}
         ./scripts/travis-encrypt-file.sh ${PRIVATE_KEY}
       fi
       echo "The decrypted GPG private key ${PRIVATE_KEY} found!"
-      KEY_ID=`gpg --no-tty --no-default-keyring --keyring ${PUBLIC_KEYRING} --import ${PUBLIC_KEY} 2>&1 | awk 'NR==1 { sub(/:/,"",$3) ; print $3 }'`
-      echo -e "trust\n5\ny\n" | gpg --no-tty --no-default-keyring --trust-model always --command-fd 0 --keyring ${PUBLIC_KEYRING} --edit-key ${KEY_ID}
+      gpg --no-tty --no-default-keyring --with-colons --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --import ${PRIVATE_KEY}
+      KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --list-keys --with-colons|grep pub|cut -d':' -f5)
+      echo -e "trust\n5\ny\n" | gpg --no-tty --no-default-keyring --trust-model always --command-fd 0 --keyring ${TMP_PUBLIC_KEYRING} --edit-key ${KEY_ID}
       # Sign file using GPG private keyring
-      echo -e "rkt\n"|gpg --no-tty --passphrase-fd 0 --trust-model always --no-default-keyring --armor --secret-keyring ${PRIVATE_KEYRING} --keyring ${PUBLIC_KEYRING} --output ${SIGNATURE} --detach-sig ${filename}
+      echo -e "rkt\n"|gpg --no-tty --passphrase-fd 0 --trust-model always --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --output ${SIGNATURE} --detach-sig ${filename}
 
       # Verify file
       gpg --no-tty --no-default-keyring --trust-model always \
-      --secret-keyring ${PRIVATE_KEYRING} --keyring ${PUBLIC_KEYRING} \
+      --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} \
       --verify ${SIGNATURE} ${filename}
     else
       if [ -f ${PRIVATE_KEY_ENC} ]; then
-        echo "The private keyring exists, but has not been decrypted in the CI environment."
+        echo "The secret key exists, but has not been decrypted in the CI environment."
         exit 1
       fi
-      echo "The decrypted GPG keyring ${PRIVATE_KEYRING} NOT found!."
+      echo "The decrypted GPG secret key ${PRIVATE_KEY} NOT found!."
       # If no GPG keyring to sign with create one
-      ./scripts/gpg-init.sh ${PRIVATE_KEYRING} ${PUBLIC_KEYRING}
+      ./scripts/gpg-init.sh ${TMP_PRIVATE_KEYRING} ${TMP_PUBLIC_KEYRING}
       # Encrypt for Travis private key and keyring if unencrypted.
-      ./scripts/travis-encrypt-file.sh ${PRIVATE_KEYRING}
+      ./scripts/travis-encrypt-file.sh ${TMP_PRIVATE_KEYRING}
       ./scripts/travis-encrypt-file.sh ${PRIVATE_KEY}
       # Copy PUBLIC_KEYRING to gh=pages folder ready to be deployed
       #cp --force "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING})"

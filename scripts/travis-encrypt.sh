@@ -36,7 +36,7 @@ if [[ $# -lt 2 ]] ; then
   exit 1
 fi
 
-SEKRET_ENC=$(echo "${string}" | openssl pkeyutl -encrypt -pubin -inkey $publickey | base64 --wrap 0)
+SEKRET_ENC=$(echo "${string}" | openssl pkeyutl -encrypt -pubin -inkey ${publickey} | base64 --wrap 0)
 
 echo "global:" >>./travis-todo.yml
 echo "  - secure: ${SEKRET_ENC}" >>./travis-todo.yml

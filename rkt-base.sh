@@ -44,7 +44,7 @@ export DEFAULT_VARIANT='minbase'
 export DEFAULT_ROOTFS='/tmp/rootfs'
 export DEFAULT_RELEASE='hardy'
 export DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/artifacts'}
-export DEFAULT_SLUG=${CI_SLUG:-'example.com/image-name'}
+export DEFAULT_SLUG='example.com/image-name'
 export DEFAULT_ORG=$(dirname ${DEFAULT_SLUG})
 export DEFAULT_ACI_NAME=$(basename ${DEFAULT_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
 export DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/release'}
@@ -52,6 +52,7 @@ export DEFAULT_BUILD_EMAIL='no-reply@example.com'
 export DEFAULT_BUILD_AUTHOR='Example LLC'
 
 export ROOTFS=${1:-${DEFAULT_ROOTFS}}
+
 export CI_BUILD_VERSION=${TRAVIS_TAG:-${DEFAULT_BUILD_VERSION}}
 export CI_SLUG=${TRAVIS_REPO_SLUG:-${DEFAULT_SLUG}}
 
@@ -88,6 +89,14 @@ export ACBUILD='/bin/acbuild --debug'
 export ACBUILD_RUN="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
 
 export BUILD_NAME="${BUILD_ORG}/${BUILD_ACI_NAME}"
+
+if [[ ${CI} == 'true' ]]; then
+  if [[ ${TRAVIS} == 'true' ]];then
+    chown travis:travis ~/.gnupg/gpg.conf
+    chgrp -R travis ~/.gnupg
+    chmod 0600 ~/.gnupg/gpg.conf
+  fi
+fi
 
 function buildend() {
   export EXIT=$?
@@ -246,7 +255,7 @@ EOF
   # See:
   # - https://github.com/containers/build/issues/167
   # - https://askubuntu.com/questions/551195/scripting-chroot-how-to
-  #dev/pts
+  #dev/pts should be dismounted first
   for i in proc sys dev
   do
       if mountpoint -q "${ROOTFS}/${i}"; then
