@@ -233,8 +233,9 @@ EOF
   #    mount -t devpts -o gid=5,mode=620 devpts ${ROOTFS}/dev/pts
   #  echo "OK"
   ##fi
-  #dev/pts
-  for i in dev proc sys
+
+  #dev/pts should be mounted last
+  for i in dev proc sys dev/pts
   do
       mount -o bind /$i ${ROOTFS}/$i
   done
@@ -256,7 +257,7 @@ EOF
   # - https://github.com/containers/build/issues/167
   # - https://askubuntu.com/questions/551195/scripting-chroot-how-to
   #dev/pts should be dismounted first
-  for i in proc sys dev
+  for i in dev/pts proc sys dev
   do
       if mountpoint -q "${ROOTFS}/${i}"; then
         echo "${ROOTFS}/${i} is a mountpoint"
