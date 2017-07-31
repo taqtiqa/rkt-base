@@ -66,4 +66,4 @@ deploy:
     on:
       all_branches: true
       tags: true
-      condition: /^(\d+)\.(\d+)\.(\d+)\+(\d+)$/
+      condition: /^(\d+)\.(\d+)\.(\d+)\-(\d+)$/
