@@ -234,6 +234,10 @@ EOF
   #  echo "OK"
   ##fi
 
+  # Do not mount dev/pts until to this issue is resolved
+  # ISSUE:
+  # https://github.com/travis-ci/travis-ci/issues/8187
+  #
   #dev/pts should be mounted last
   for i in dev proc sys dev/pts
   do
@@ -249,15 +253,21 @@ EOF
   chroot ${ROOTFS} apt-get --purge -y autoremove
   chroot ${ROOTFS} apt-get --purge -y autoremove
   chroot ${ROOTFS} apt-get clean
-  #chroot ${ROOTFS} echo 'debconf debconf/frontend select Teletype' | chroot ${ROOTFS} debconf-set-selections
-  #chroot ${ROOTFS} dpkg-reconfigure debconf
-  # Cleanup as ACBuild expects.  Otherwise $ACBUILD begin ${ROOTFS} complains:
-  #   $ begin: build already in progress in this working dir
+  # Cleanup by dismounting as ACBuild expects us to have.
+  # Otherwise $ACBUILD begin ${ROOTFS} complains:
+  #
+  #  $ begin: build already in progress in this working dir
+  #
   # See:
   # - https://github.com/containers/build/issues/167
   # - https://askubuntu.com/questions/551195/scripting-chroot-how-to
-  #dev/pts should be dismounted first
-  for i in dev/pts proc sys dev
+  #
+  # Do not mount dev/pts until to this issue is resolved
+  # ISSUE:
+  # https://github.com/travis-ci/travis-ci/issues/8187
+  #
+  # dev/pts should be dismounted first
+  for i in proc sys dev
   do
       if mountpoint -q "${ROOTFS}/${i}"; then
         echo "${ROOTFS}/${i} is a mountpoint"
