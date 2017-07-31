@@ -70,21 +70,13 @@ if [[ ! -f ${PRIVATE_KEY} ]]; then
     pushd ..
       # Create secret and public key
       gpg --no-tty --batch --gen-key ./scripts/gpg-batch
-      #gpg --no-tty --no-default-keyring --trust-model always  --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --import ${TMP_PRIVATE_KEY}
       # Amend KEY_ID selection to use --with-colon
       KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --list-keys --with-colons|grep pub|cut -d':' -f5)
-      #KEY_ID=`gpg --no-tty --no-default-keyring --keyring ${TMP_PUBLIC_KEYRING} --import ${TMP_PUBLIC_KEYRING} 2>&1 | awk 'NR==1 { sub(/:/,"",$3) ; print $3 }'`
       echo -e "trust\n5\ny\n" | gpg --no-tty --no-default-keyring --trust-model always --command-fd 0 --keyring ${TMP_PUBLIC_KEYRING} --edit-key ${KEY_ID}
       # Export secret key as armored text
       gpg --no-tty --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --export-secret-key ${KEY_ID} >${PRIVATE_KEY}
       # Export public key as armored text
       gpg --no-tty --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --export ${KEY_ID} >${PUBLIC_KEY}
-      #gpg --no-tty --no-default-keyring --armor --export-ownertrust > ownertrust-gpg.txt
-      # Provide keyrings as requested
-      #mv ${TMP_PRIVATE_KEYRING} ${PRIVATE_KEYRING}
-      #mv ${TMP_PUBLIC_KEYRING} ${PUBLIC_KEYRING}
-      #chmod 400 ${PRIVATE_KEYRING}
-      #chmod 400 ${PUBLIC_KEYRING}
       chmod 400 ${PRIVATE_KEY}
       chmod 400 ${PUBLIC_KEY}
       rm -f ${TMP_PRIVATE_KEYRING}

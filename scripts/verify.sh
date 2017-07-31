@@ -21,15 +21,15 @@
 
 set -exuo pipefail
 
-filename=$1
-signature=$2
-publickey=$3
+FILENAME=$1
+SIGNATURE=$2
+PUBLICKEY=$3
 
 if [[ $# -lt 3 ]] ; then
   echo "Usage: verify <file> <signature> <public_key>"
   exit 1
 fi
 
-openssl base64 -d -in $signature -out /tmp/$filename.sha256.bin
-openssl dgst -sha256 -verify $publickey -signature /tmp/$filename.sha256.bin $filename
-rm /tmp/$filename.sha256.bin
+openssl base64 -d -in ${SIGNATURE} -out /tmp/${FILENAME}.sha256.bin
+openssl dgst -sha256 -verify ${PUBLICKEY} -signature /tmp/${FILENAME}.sha256.bin ${FILENAME}
+rm /tmp/${FILENAME}.sha256.bin

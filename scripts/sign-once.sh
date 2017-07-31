@@ -29,8 +29,8 @@
 
 set -exuo pipefail
 
-prefix=$1
-filename=$2
+PREFIX=$1
+FILENAME=$2
 
 if [[ $# -lt 2 ]] ; then
   echo "Usage: sign-once <pub-key-prefix> <file>"
@@ -40,8 +40,8 @@ fi
 function signonceend() {
     export EXIT=$?
     if [[ $EXIT != 0 ]]; then
-      rm -f ${publickey}
-      rm -f ${signature}
+      rm -f ${PUBLICKEY_FILENAME}
+      rm -f ${SIGNATURE_FILENAME}
     fi
     rm -f ${TMP_PRIVATE_KEYRING}
     rm -f ${TMP_PUBLIC_KEYRING}
@@ -53,8 +53,8 @@ trap signonceend EXIT
 TMP_PRIVATE_KEYRING=./scripts/rkt.sec
 TMP_PUBLIC_KEYRING=./scripts/rkt.pub
 
-publickey=./${prefix}-signoncekey-public.gpg
-signature=${filename}.asc
+PUBLICKEY_FILENAME="./${PREFIX}-signoncekey-public.asc"
+SIGNATURE_FILENAME="${FILENAME}.asc"
 
 dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
@@ -64,19 +64,16 @@ pushd ${dir}
     gpg --batch --gen-key ./scripts/gpg-batch
     KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --list-keys --with-colons|grep pub|cut -d':' -f5)
     echo -e "trust\n5\ny\n" | gpg --command-fd 0 --edit-key ${KEY_ID}
-
     # Export public key
     gpg --no-default-keyring --armor \
     --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} \
-    --export ${KEY_ID} >${publickey}
-
+    --export ${KEY_ID} >${PUBLICKEY_FILENAME}
     # Sign file
-    echo -e "rkt\n"|gpg --passphrase-fd 0 --trust-model always --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --output ${signature} --detach-sig ${filename}
-
+    echo -e "rkt\n"|gpg --passphrase-fd 0 --trust-model always --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --output ${SIGNATURE_FILENAME} --detach-sig ${FILENAME}
     # Verify file
     gpg --trust-model always --no-default-keyring \
     --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} \
-    --verify ${signature} ${filename}
+    --verify ${SIGNATURE_FILENAME} ${FILENAME}
 
     rm -f ${TMP_PRIVATE_KEYRING}
     rm -f ${TMP_PUBLIC_KEYRING}

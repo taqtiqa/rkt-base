@@ -28,15 +28,14 @@
 
 set -exuo pipefail
 
-filename=$1
-#privatekey=$2
+FILENAME_TO_SIGN=$1
 
 if [[ $# -lt 1 ]] ; then
   echo "Usage: sign <file>"
   exit 1
 fi
 
-SIGNATURE="${filename}.asc"
+SIGNATURE="${FILENAME_TO_SIGN}.asc"
 TMP_GPG_HOME=$( mktemp -d -t 'XXXX' )
 
 if [ -f ${SIGNATURE} ]; then
@@ -44,8 +43,8 @@ if [ -f ${SIGNATURE} ]; then
   exit 1
 fi
 
-if [ ! -f ${filename} ]; then
-  echo "${filename} does not exist.  Nothing to sign. Exiting."
+if [ ! -f ${FILENAME_TO_SIGN} ]; then
+  echo "${FILENAME_TO_SIGN} does not exist.  Nothing to sign. Exiting."
   exit 1
 fi
 
@@ -71,7 +70,6 @@ function signend() {
     rm -f ./travis-ca.cert
     rm -f ${TMP_PRIVATE_KEYRING}
     rm -f ${TMP_PUBLIC_KEYRING}
-
     exit $EXIT
 }
 
@@ -83,7 +81,6 @@ pushd ${WORKING_DIR}
       if [ ! -f ${PRIVATE_KEY_ENC} ]; then
         echo "The encrypted private keyring is missing - somehow!"
         # Encrypt for Travis private key and keyring if unencrypted.
-        #./scripts/travis-encrypt-file.sh ${PRIVATE_KEYRING}
         ./scripts/travis-encrypt-file.sh ${PRIVATE_KEY}
       fi
       echo "The decrypted GPG private key ${PRIVATE_KEY} found!"
@@ -91,12 +88,11 @@ pushd ${WORKING_DIR}
       KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --list-keys --with-colons|grep pub|cut -d':' -f5)
       echo -e "trust\n5\ny\n" | gpg --no-tty --no-default-keyring --trust-model always --command-fd 0 --keyring ${TMP_PUBLIC_KEYRING} --edit-key ${KEY_ID}
       # Sign file using GPG private keyring
-      echo -e "rkt\n"|gpg --no-tty --passphrase-fd 0 --trust-model always --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --output ${SIGNATURE} --detach-sig ${filename}
-
+      echo -e "rkt\n"|gpg --no-tty --passphrase-fd 0 --trust-model always --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --output ${SIGNATURE} --detach-sig ${FILENAME_TO_SIGN}
       # Verify file
       gpg --no-tty --no-default-keyring --trust-model always \
       --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} \
-      --verify ${SIGNATURE} ${filename}
+      --verify ${SIGNATURE} ${FILENAME_TO_SIGN}
     else
       if [ -f ${PRIVATE_KEY_ENC} ]; then
         echo "The secret key exists, but has not been decrypted in the CI environment."
@@ -108,8 +104,6 @@ pushd ${WORKING_DIR}
       # Encrypt for Travis private key and keyring if unencrypted.
       ./scripts/travis-encrypt-file.sh ${TMP_PRIVATE_KEYRING}
       ./scripts/travis-encrypt-file.sh ${PRIVATE_KEY}
-      # Copy PUBLIC_KEYRING to gh=pages folder ready to be deployed
-      #cp --force "${PUBLIC_KEYRING}" "./gh-pages/keyrings/$(basename ${PUBLIC_KEYRING})"
       echo "A private keyring NOW exists and needs decryption in the CI environment."
       exit 1
     fi

@@ -101,13 +101,14 @@ fi
 function buildend() {
   export EXIT=$?
   buildcleanup
-  #${ACBUILD}  end
-  #[[ $? -ne 0 ]] && exit $? # Exit if non-zero exit code
 }
 
 function buildcleanup() {
-  # Dismount order matters
-  rry=("${ROOTFS}/dev/pts" "${ROOTFS}/proc" "${ROOTFS}/sys" "${ROOTFS}/dev" )
+  # Do not mount dev/pts until to this issue is resolved
+  # ISSUE:
+  # https://github.com/travis-ci/travis-ci/issues/8187
+  # "${ROOTFS}/dev/pts" Dismount order matters
+  rry=( "${ROOTFS}/proc" "${ROOTFS}/sys" "${ROOTFS}/dev" )
   for mp in "${rry[@]}"
   do
     if mountpoint -q "${mp}"; then
@@ -129,30 +130,7 @@ function check_citool() {
   fi
 }
 
-do_first () {
-  echo "Prove..."
-  trap "do_third" EXIT
-  source ./scripts/build-rootfs.sh
-  do_third
-}
-#do_second () {
-#  echo "ho lanciato il secondo"
-#  trap "do_third" EXIT
-#  source ./third.sh
-#  do_third
-#}
-do_third () {
-  trap "buildend" EXIT
-  #trap - EXIT
-  echo "... we get here?"
-}
-
 trap "buildend" ERR
-
-#if [[ -d ${ROOTFS} ]]; then
-#  echo "Remove existing rootfs directory"
-#  rm -rf ${ROOTFS}
-#fi
 
 if [ "$EUID" -ne 0 ]; then
   echo "This script uses functionality which requires root privileges"
@@ -165,8 +143,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-#(source ./scripts/build-rootfs.sh)
-#do_first
 if [[ ! -d ${ROOTFS} ]]; then
   ${DEBOOTSTRAP} --include ${BUILD_GUEST_PACKAGES} --components ${BUILD_COMPONENTS} --variant ${BUILD_VARIANT} ${BUILD_RELEASE} ${ROOTFS} ${BUILD_GUEST_PACKAGE_MIRROR}
 
@@ -209,30 +185,6 @@ DPkg::Options {"--force-confdef";"--force-confmiss";"--force-confold"};
 DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
 Dir::Etc::SourceList "/etc/apt/sources.list";
 EOF
-
-  # Consider using schroot if build trouble persists
-  # https://github.com/neurodebian/travis-chroots/blob/master/tools/travis_chroot
-  ##if [[ ! -z "${CI}" ]]; then
-  #  echo "Mounting /proc in chroot... "
-  #  if [ ! -d "${ROOTFS}/proc" ] ; then
-  #      mkdir -p ${ROOTFS}/proc
-  #      echo "Created ${ROOTFS}/proc"
-  #  fi
-  #  mount -t proc -o nosuid,noexec,nodev proc ${ROOTFS}/proc
-  #  echo "OK"
-  #  echo "Mounting /sys in chroot... "
-  #  if [ ! -d "${ROOTFS}/sys" ] ; then
-  #      mkdir -p ${ROOTFS}/sys
-  #      echo "Created ${ROOTFS}/sys"
-  #  fi
-  #  mount -t sysfs -o nosuid,noexec,nodev sysfs ${ROOTFS}/sys
-  #  echo "OK"
-  #  echo "Mounting /dev/ and /dev/pts in chroot... "
-  #    mkdir -p -m 755 ${ROOTFS}/dev/pts
-  #    mount -t devtmpfs -o mode=0755,nosuid devtmpfs ${ROOTFS}/dev
-  #    mount -t devpts -o gid=5,mode=620 devpts ${ROOTFS}/dev/pts
-  #  echo "OK"
-  ##fi
 
   # Do not mount dev/pts until to this issue is resolved
   # ISSUE:

@@ -28,18 +28,19 @@
 #
 #
 
-publickey=$1
-string=$2
+PUBLICKEY=$1
+STRING=$2
 
 if [[ $# -lt 2 ]] ; then
   echo "Usage: travis-encrypt <public_key> <string>"
   exit 1
 fi
 
-SEKRET_ENC=$(echo "${string}" | openssl pkeyutl -encrypt -pubin -inkey ${publickey} | base64 --wrap 0)
+SEKRET_ENC=$(echo "${STRING}" | openssl pkeyutl -encrypt -pubin -inkey ${PUBLICKEY} | base64 --wrap 0)
 
+echo "Local: $(date +%F_%T%Z)  UTC: $(date --utc +%F_%T)" >>./travis-todo.yml
 echo "global:" >>./travis-todo.yml
 echo "  - secure: ${SEKRET_ENC}" >>./travis-todo.yml
 
-echo "Raw: ${string}"
+echo "Raw: ${STRING}"
 echo "Encrypted: ${SEKRET_ENC}"

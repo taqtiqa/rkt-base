@@ -1,6 +1,8 @@
 language: generic
 dist: trusty
 sudo: true
+# Deploy only builds with release semantic version numbers
+# Example: 1.2.3+4 OR 1.2.3-4 OR 1.2.3-2+4
 branches:
   only:
     - /^((\d+)\.(\d+)\.(\d+))?(-|\+)(\d+)?(|(-|\+)(\d+))?$/
@@ -17,7 +19,6 @@ branches:
 #    before_deploy
 #    deploy
 #    after_deploy
-
 
 notifications:
   email:
@@ -52,7 +53,8 @@ after_success:
       else
         echo "This will not run on tag triggered build!"
       fi
-
+# Deploy only builds with release semantic version numbers
+# Example: 1.2.3+4 BUT NOT 1.2.3-4 or 1.2.3-2+4
 deploy:
   - provider: releases
     api_key: ${GH_PA_TOKEN}

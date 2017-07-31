@@ -35,4 +35,3 @@ pushd /tmp
   rm -rf openssl-${OPENSSL_VER}
   rm -rf ${TMP_SSL_HOME}
 popd
-#openssl version -a
