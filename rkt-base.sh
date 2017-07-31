@@ -239,7 +239,7 @@ EOF
   # https://github.com/travis-ci/travis-ci/issues/8187
   #
   #dev/pts should be mounted last
-  for i in dev proc sys dev/pts
+  for i in dev proc sys
   do
       mount -o bind /$i ${ROOTFS}/$i
   done
