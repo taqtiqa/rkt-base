@@ -66,5 +66,4 @@ deploy:
     on:
       all_branches: true
       tags: true
-      repo: ${TRAVIS_SLUG}
       condition: "$TRAVIS_TAG =~ ^(\d+)\.(\d+)\.(\d+)\+(\d+)$"
