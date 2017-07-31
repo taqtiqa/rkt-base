@@ -6,7 +6,8 @@ sudo: true
 branches:
   only:
     - /^((\d+)\.(\d+)\.(\d+))?(-|\+)(\d+)?(|(-|\+)(\d+))?$/
-#Build order
+
+# Build order
 #    before_install
 #    install
 #    before_script
@@ -14,7 +15,7 @@ branches:
 #    after_success / after_failure
 #    after_script
 #
-#After the the after_script has run.
+# After the the after_script has run.
 #
 #    before_deploy
 #    deploy
