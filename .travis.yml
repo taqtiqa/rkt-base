@@ -1,7 +1,8 @@
 language: generic
 dist: trusty
 sudo: true
-
+branches:
+  only: /^((\d+)\.(\d+)\.(\d+))?(-|\+)(\d+)?(|(-|\+)(\d+))?$/
 #Build order
 #    before_install
 #    install
@@ -68,8 +69,9 @@ deploy:
     overwrite: true
     on:
       repo: ${TRAVIS_REPO_SLUG}
-      tags: true
+      tags: /^((\d+)\.(\d+)\.(\d+))?(-|\+)(\d+)?(|(-|\+)(\d+))?$/
       all_branches: true
+      #condition: "${TRAVIS_TAG} =~ ^((\d+)\.(\d+)\.(\d+))?(-|\+)(\d+)?(|(-|\+)(\d+))?$"
 
 after_deploy:
   - echo "We can put normal shell commands here"
