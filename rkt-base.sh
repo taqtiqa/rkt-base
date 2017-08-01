@@ -260,12 +260,11 @@ ${ACBUILD} label add version ${BUILD_VERSION}
 ${ACBUILD} label add arch amd64
 ${ACBUILD} label add os linux
 ${ACBUILD} annotation add authors "${BUILD_AUTHOR} <${BUILD_EMAIL}>"
+${ACBUILD} annotation add created "$( date --utc --rfc-3339=ns | tr ' ' 'T' )"
 
 ${ACBUILD} set-user 0
 ${ACBUILD} set-group 0
 ${ACBUILD} environment add OS_VERSION ${BUILD_RELEASE}
-
-${ACBUILD} run -- apt-get update
 
 echo "Write the Container Image..."
 ${ACBUILD} write --overwrite ${BUILD_ARTIFACT}
