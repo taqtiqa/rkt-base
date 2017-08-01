@@ -86,7 +86,7 @@ export TERM=linux
 export DEBIAN_FRONTEND='noninteractive'
 
 export ACBUILD='/bin/acbuild --debug'
-export ACBUILD_RUN="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
+export ACBUILD_CHROOT="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
 
 export BUILD_NAME="${BUILD_ORG}/${BUILD_ACI_NAME}"
 
@@ -242,10 +242,6 @@ ${ACBUILD} begin ${ROOTFS}
 # Name the ACI
 ${ACBUILD} set-name ${BUILD_NAME}
 
-# Based on TAQTIQA Linux base image of Ubuntu (~53 MB)
-# rkt trust --prefix=taqtiqa.io/rkt-base
-#${ACBUILD} dep add taqtiqa.io/rkt-base:0.0.0-0
-
 ${ACBUILD} label add version ${BUILD_VERSION}
 ${ACBUILD} label add arch amd64
 ${ACBUILD} label add os linux
@@ -255,12 +251,13 @@ ${ACBUILD} set-user 0
 ${ACBUILD} set-group 0
 ${ACBUILD} environment add OS_VERSION ${BUILD_RELEASE}
 
+${ACBUILD} run -- apt-get update
+
 echo "Write the Container Image..."
 ${ACBUILD} write --overwrite ${BUILD_ARTIFACT}
 echo "Created Container Image ${BUILD_ARTIFACT}."
+${ACBUILD} end
 
 echo "Sign the Container Image..."
 ./scripts/sign.sh ${BUILD_ARTIFACT}
 echo "Signed the Container Image..."
-
-${ACBUILD} end
