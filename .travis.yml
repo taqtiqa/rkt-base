@@ -67,4 +67,6 @@ deploy:
     on:
       tags: /^([0-9]+)\.([0-9]+)\.([0-9]+)\+([0-9]+)$/
       all_branches: true
-      #condition: "$TRAVIS_TAG =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\+([0-9]+)$"
+      repo: ${TRAVIS_SLUG}
+      condition: "$TRAVIS_TAG =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\+([0-9]+)$"
+

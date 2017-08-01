@@ -85,7 +85,7 @@ pushd ${WORKING_DIR}
       fi
       echo "The decrypted GPG private key ${PRIVATE_KEY} found!"
       gpg --no-tty --no-default-keyring --with-colons --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --import ${PRIVATE_KEY}
-      KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --list-keys --with-colons|grep pub|cut -d':' -f5)
+      KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --no-auto-check-trustdb --list-keys --with-colons|grep pub|cut -d':' -f5)
       echo -e "trust\n5\ny\n" | gpg --no-tty --no-default-keyring --trust-model always --command-fd 0 --keyring ${TMP_PUBLIC_KEYRING} --edit-key ${KEY_ID}
       # Sign file using GPG private keyring
       echo -e "rkt\n"|gpg --no-tty --passphrase-fd 0 --trust-model always --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --output ${SIGNATURE} --detach-sig ${FILENAME_TO_SIGN}

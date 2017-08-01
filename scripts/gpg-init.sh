@@ -70,8 +70,7 @@ if [[ ! -f ${PRIVATE_KEY} ]]; then
     pushd ..
       # Create secret and public key
       gpg --no-tty --batch --gen-key ./scripts/gpg-batch
-      # Amend KEY_ID selection to use --with-colon
-      KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --list-keys --with-colons|grep pub|cut -d':' -f5)
+      KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --no-auto-check-trustdb --list-keys --with-colons|grep pub|cut -d':' -f5)
       echo -e "trust\n5\ny\n" | gpg --no-tty --no-default-keyring --trust-model always --command-fd 0 --keyring ${TMP_PUBLIC_KEYRING} --edit-key ${KEY_ID}
       # Export secret key as armored text
       gpg --no-tty --no-default-keyring --armor --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --export-secret-key ${KEY_ID} >${PRIVATE_KEY}

@@ -62,7 +62,7 @@ pushd ${dir}
   pushd ..
     # Create private and public keys
     gpg --batch --gen-key ./scripts/gpg-batch
-    KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --list-keys --with-colons|grep pub|cut -d':' -f5)
+    KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --no-auto-check-trustdb --list-keys --with-colons|grep pub|cut -d':' -f5)
     echo -e "trust\n5\ny\n" | gpg --command-fd 0 --edit-key ${KEY_ID}
     # Export public key
     gpg --no-default-keyring --armor \
