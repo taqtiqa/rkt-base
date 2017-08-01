@@ -84,7 +84,7 @@ pushd ${WORKING_DIR}
         ./scripts/travis-encrypt-file.sh ${PRIVATE_KEY}
       fi
       echo "The decrypted GPG private key ${PRIVATE_KEY} found!"
-      gpg --no-tty --no-default-keyring --with-colons --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --import ${PRIVATE_KEY}
+      gpg --no-tty --no-default-keyring --with-colons --no-auto-check-trustdb --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --import ${PRIVATE_KEY}
       KEY_ID=$(gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --no-auto-check-trustdb --list-keys --with-colons|grep pub|cut -d':' -f5)
       echo -e "trust\n5\ny\n" | gpg --no-tty --no-default-keyring --trust-model always --command-fd 0 --keyring ${TMP_PUBLIC_KEYRING} --edit-key ${KEY_ID}
       # Sign file using GPG private keyring

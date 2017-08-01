@@ -36,8 +36,9 @@ export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
 
 export DEFAULT_BUILD_ARCH='amd64'
 export DEFAULT_BUILD_VERSION='0.0.0-0'
+export DEFAULT_CI='false'
 export DEFAULT_COMPONENTS='main,universe,multiverse,restricted'
-export DEFAULT_GUEST_PACKAGES='apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
+export DEFAULT_GUEST_PACKAGES='busybox,network-manager,apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
 export DEFAULT_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu' #'http://old-releases.ubuntu.com/ubuntu'
 export DEFAULT_HOST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
 export DEFAULT_VARIANT='minbase'
@@ -55,6 +56,7 @@ export ROOTFS=${1:-${DEFAULT_ROOTFS}}
 
 export CI_BUILD_VERSION=${TRAVIS_TAG:-${DEFAULT_BUILD_VERSION}}
 export CI_SLUG=${TRAVIS_REPO_SLUG:-${DEFAULT_SLUG}}
+export CI=${CI:-${DEFAULT_CI}}
 
 export ACI_NAME=$(basename ${CI_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
 export ACI_ORG=$(dirname ${CI_SLUG})
@@ -195,6 +197,10 @@ EOF
   do
       mount -o bind /$i ${ROOTFS}/$i
   done
+  if [[ ${CI} == 'false' ]]; then
+    # We are on a desktop so can mount dev/pts
+    mount -o bind /$i ${ROOTFS}/dev/pts
+  fi
   chroot ${ROOTFS} echo 'debconf debconf/frontend select Noninteractive' | chroot ${ROOTFS} debconf-set-selections
   chroot ${ROOTFS} dpkg-reconfigure debconf
   chroot ${ROOTFS} echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
@@ -219,12 +225,20 @@ EOF
   # https://github.com/travis-ci/travis-ci/issues/8187
   #
   # dev/pts should be dismounted first
+  if [[ ${CI} == 'false' ]]; then
+    # We are on a desktop so can dismount dev/pts
+    if mountpoint -q "${ROOTFS}/dev/pts"; then
+      echo "${ROOTFS}/dev/pts is a mountpoint"
+      umount -lf ${ROOTFS}/dev/pts
+    else
+      echo "${ROOTFS}/dev/pts is not a mountpoint"
+    fi
+  fi
   for i in proc sys dev
   do
       if mountpoint -q "${ROOTFS}/${i}"; then
         echo "${ROOTFS}/${i} is a mountpoint"
         umount -lf ${ROOTFS}/$i
-        #rm -rf ${ROOTFS}/$i
       else
         echo "${ROOTFS}/${i} is not a mountpoint"
       fi
