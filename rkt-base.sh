@@ -42,7 +42,7 @@ export DEFAULT_BUILD_ARCH='amd64'
 export DEFAULT_BUILD_VERSION='0.0.0-0'
 export DEFAULT_CI='false'
 export DEFAULT_COMPONENTS='main,universe,multiverse,restricted'
-export DEFAULT_GUEST_PACKAGES='busybox,network-manager,apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
+export DEFAULT_GUEST_PACKAGES='gnupg,busybox,network-manager,apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
 export DEFAULT_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu' #'http://old-releases.ubuntu.com/ubuntu'
 export DEFAULT_HOST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
 export DEFAULT_VARIANT='minbase'
@@ -107,7 +107,7 @@ case "${BUILD_RELEASE}" in
     echo "Do not build ACI release images from ${BUILD_RELEASE}"
     exit 1
     ;;
-  hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|trusty|utopic|vivid|wiley|xenial|yakkety|zesty|angry )
+  hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|trusty|utopic|vivid|wily|xenial|yakkety|zesty|angry )
     echo "Building ACI release ${BUILD_VERSION} from branch: ${BUILD_RELEASE}"
     ;;
   travis)
@@ -120,7 +120,7 @@ case "${BUILD_RELEASE}" in
 esac
 
 case "${BUILD_RELEASE}" in
-  trusty|vivid|wiley|xenial|yakkety|zesty|angry)
+  trusty|vivid|wily|xenial|yakkety|zesty|angry)
     BUILD_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
     echo "Ubuntu mirror changed via BUILD_GUEST_PACKAGE_MIRROR=${BUILD_GUEST_PACKAGE_MIRROR}"
     ;;
