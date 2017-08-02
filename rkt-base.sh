@@ -120,7 +120,7 @@ case "${BUILD_RELEASE}" in
 esac
 
 case "${BUILD_RELEASE}" in
-  trusty|utopic|vivid|wiley|xenial|yakkety|zesty|angry)
+  trusty|vivid|wiley|xenial|yakkety|zesty|angry)
     BUILD_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
     echo "Ubuntu mirror changed via BUILD_GUEST_PACKAGE_MIRROR=${BUILD_GUEST_PACKAGE_MIRROR}"
     ;;
@@ -208,10 +208,20 @@ deb-src ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE} multiverse
 
 deb ${BUILD_GUEST_PACKAGE_MIRROR} ${BUILD_RELEASE}-backports main restricted universe multiverse
 
+EOF
+# After trusty the GNU packages seem to be in the std Ubuntu repositories
+case "${BUILD_RELEASE}" in
+  hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|trusty)
+    cat << EOF >> ${ROOTFS}/etc/apt/sources.list
 # PPA repositories without having to install more cruft
 deb http://ppa.launchpad.net/dns/gnu/ubuntu ${BUILD_RELEASE} main
 deb-src http://ppa.launchpad.net/dns/gnu/ubuntu ${BUILD_RELEASE} main
 EOF
+    ;;
+  *)
+    echo "Do not append GNU PPA repository to /etc/apt/sources.list"
+    ;;
+esac
 
   cat << EOF > ${ROOTFS}/etc/apt/apt.conf.d/01lean
 APT::Install-Suggests "0";
@@ -249,7 +259,7 @@ EOF
   chroot ${ROOTFS} dpkg-reconfigure locales
   chroot ${ROOTFS} apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B187F352479B857B
   chroot ${ROOTFS} apt-get -qq update
-  chroot ${ROOTFS} apt-get -y dist-upgrade
+  chroot ${ROOTFS} apt-get -y -f -V dist-upgrade
   chroot ${ROOTFS} apt-get --purge -y autoremove
   chroot ${ROOTFS} apt-get --purge -y autoremove
   chroot ${ROOTFS} apt-get clean
