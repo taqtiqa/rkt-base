@@ -31,7 +31,8 @@ export ACI_EMAIL='coders@taqtiqa.com'
 
 export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
 
-export ACI_RELEASE=$(git symbolic-ref --short HEAD) # NB: Lower case - this is case sensitive
+#The branch name the tag is on
+export ACI_RELEASE=$(git branch --contains tags/8.10.0.0| grep '[^* ]+' -Eo) # NB: Lower case - this is case sensitive
 
 export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
 
