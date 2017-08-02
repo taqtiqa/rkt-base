@@ -260,7 +260,7 @@ ${ACBUILD} label add version ${BUILD_VERSION}
 ${ACBUILD} label add arch amd64
 ${ACBUILD} label add os linux
 ${ACBUILD} annotation add authors "${BUILD_AUTHOR} <${BUILD_EMAIL}>"
-${ACBUILD} annotation add created "$( date --utc --rfc-3339=ns | tr ' ' 'T' )"
+${ACBUILD} annotation add created "$( date --utc --iso-8601=ns )"
 
 ${ACBUILD} set-user 0
 ${ACBUILD} set-group 0
