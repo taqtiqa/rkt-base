@@ -119,6 +119,16 @@ case "${BUILD_RELEASE}" in
     ;;
 esac
 
+case "${BUILD_RELEASE}" in
+  trusty|utopic|vivid|wiley|xenial|yakkety|zesty|angry)
+    BUILD_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
+    echo "Ubuntu mirror changed via BUILD_GUEST_PACKAGE_MIRROR=${BUILD_GUEST_PACKAGE_MIRROR}"
+    ;;
+  *)
+    echo "Do not build ACI release images from unknown branches"
+    ;;
+esac
+
 
 if [[ ${CI} == 'true' ]]; then
   if [[ ${TRAVIS} == 'true' ]];then
