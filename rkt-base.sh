@@ -31,12 +31,8 @@ export ACI_EMAIL='coders@taqtiqa.com'
 
 export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
 
-if [[ -z ${TRAVIS_TAG+x} ]]; then
-export ACI_RELEASE=$(git branch --contains tags/${TRAVIS_TAG}| grep '[^* ]+' -Eo) # NB: Lower case - this is case sensitive
-else
-# We are in Travis-CI with a detached HEAD - The branch name the tag is on is not available.
-export ACI_RELEASE='travis'
-fi
+# In Travis-CI we have a detached HEAD - The branch name the tag is on is not available.
+export ACI_RELEASE=$(cat ./RELEASE)
 
 export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
 
@@ -86,6 +82,12 @@ export BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
 export BUILD_FILE=${BUILD_ACI_NAME}-${BUILD_VERSION}-linux-${BUILD_ARCH}.aci
 export BUILD_ARTIFACTS_DIR='.'
 export BUILD_ARTIFACT=${BUILD_ARTIFACTS_DIR}/${BUILD_FILE}
+
+REPO_VERSION=$(cat ./VERSION)
+if [[ ${BUILD_VERSION} != ${REPO_VERSION} ]]; then
+  msg "The tag version number and the content of the VERSION file do not match"
+  exit 1
+fi
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
