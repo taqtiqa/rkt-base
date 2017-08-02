@@ -249,7 +249,7 @@ EOF
   chroot ${ROOTFS} dpkg-reconfigure locales
   chroot ${ROOTFS} apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B187F352479B857B
   chroot ${ROOTFS} apt-get -qq update
-  chroot ${ROOTFS} apt-get -y dist-upgrade
+  chroot ${ROOTFS} apt-get -y -f -V dist-upgrade
   chroot ${ROOTFS} apt-get --purge -y autoremove
   chroot ${ROOTFS} apt-get --purge -y autoremove
   chroot ${ROOTFS} apt-get clean
