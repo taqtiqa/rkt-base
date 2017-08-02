@@ -27,7 +27,6 @@ export DEBOOTSTRAP=/usr/sbin/debootstrap
 
 export ACI_ARCH='amd64'
 export ACI_AUTHOR='TAQTIQA LLC'
-export ACI_RELEASE='intrepid' # NB: Lower case - this is case sensitive
 export ACI_EMAIL='coders@taqtiqa.com'
 
 export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
@@ -43,11 +42,11 @@ export DEFAULT_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu' #'http://
 export DEFAULT_HOST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
 export DEFAULT_VARIANT='minbase'
 export DEFAULT_ROOTFS='/tmp/rootfs'
-export DEFAULT_RELEASE='intrepid'
+export DEFAULT_RELEASE='master'
 export DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/artifacts'}
-export DEFAULT_SLUG='example.com/image-name'
+export DEFAULT_ACI_NAME=$(basename $(git remote show -n origin | grep Fetch | cut -d: -f2-) .git)  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
+export DEFAULT_SLUG="example.com/${DEFAULT_ACI_NAME}"
 export DEFAULT_ORG=$(dirname ${DEFAULT_SLUG})
-export DEFAULT_ACI_NAME=$(basename ${DEFAULT_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
 export DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/release'}
 export DEFAULT_BUILD_EMAIL='no-reply@example.com'
 export DEFAULT_BUILD_AUTHOR='Example LLC'
@@ -58,6 +57,7 @@ export CI_BUILD_VERSION=${TRAVIS_TAG:-${DEFAULT_BUILD_VERSION}}
 export CI_SLUG=${TRAVIS_REPO_SLUG:-${DEFAULT_SLUG}}
 export CI=${CI:-${DEFAULT_CI}}
 
+export ACI_RELEASE=$(git symbolic-ref --short HEAD) # NB: Lower case - this is case sensitive
 export ACI_NAME=$(basename ${CI_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
 export ACI_ORG=$(dirname ${CI_SLUG})
 
@@ -91,6 +91,20 @@ export ACBUILD='/bin/acbuild --debug'
 export ACBUILD_CHROOT="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
 
 export BUILD_NAME="${BUILD_ORG}/${BUILD_ACI_NAME}"
+
+
+case "${BUILD_RELEASE}" in
+  master)
+    echo "Do not build ACI release images from ${BUILD_RELEASE}"
+    exit 1
+    ;;
+  hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneric|precise|quantal|raring|saucy|trusty|utopic|vivid|wiley|xenial|yakkety|zesty|angry )
+    echo "Building ACI release ${BUILD_VERSION} from branch: ${BUILD_RELEASE}"
+    ;;
+  *) echo "Do not build ACI release images from unknown branches" && exit 1
+    ;;
+esac
+
 
 if [[ ${CI} == 'true' ]]; then
   if [[ ${TRAVIS} == 'true' ]];then
