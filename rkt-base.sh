@@ -31,8 +31,10 @@ export ACI_EMAIL='coders@taqtiqa.com'
 
 export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
 
+if [[ ! -z ${TRAVIS_TAG+x} ]]; then
 #The branch name the tag is on
-export ACI_RELEASE=$(git branch --contains tags/8.10.0.0| grep '[^* ]+' -Eo) # NB: Lower case - this is case sensitive
+export ACI_RELEASE=$(git branch --contains tags/${TRAVIS_TAG}| grep '[^* ]+' -Eo) # NB: Lower case - this is case sensitive
+fi
 
 export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
 
