@@ -31,6 +31,8 @@ export ACI_EMAIL='coders@taqtiqa.com'
 
 export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
 
+export ACI_RELEASE=$(git symbolic-ref --short HEAD) # NB: Lower case - this is case sensitive
+
 export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
 
 export DEFAULT_BUILD_ARCH='amd64'
@@ -57,7 +59,6 @@ export CI_BUILD_VERSION=${TRAVIS_TAG:-${DEFAULT_BUILD_VERSION}}
 export CI_SLUG=${TRAVIS_REPO_SLUG:-${DEFAULT_SLUG}}
 export CI=${CI:-${DEFAULT_CI}}
 
-export ACI_RELEASE=$(git symbolic-ref --short HEAD) # NB: Lower case - this is case sensitive
 export ACI_NAME=$(basename ${CI_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
 export ACI_ORG=$(dirname ${CI_SLUG})
 
@@ -209,11 +210,11 @@ EOF
   #dev/pts should be mounted last
   for i in dev proc sys
   do
-      mount -o bind /$i ${ROOTFS}/$i
+      mount -o bind /${i} ${ROOTFS}/${i}
   done
   if [[ ${CI} == 'false' ]]; then
     # We are on a desktop so can mount dev/pts
-    mount -o bind /$i ${ROOTFS}/dev/pts
+    mount -o bind /${i} ${ROOTFS}/dev/pts
   fi
   chroot ${ROOTFS} echo 'debconf debconf/frontend select Noninteractive' | chroot ${ROOTFS} debconf-set-selections
   chroot ${ROOTFS} dpkg-reconfigure debconf
@@ -252,7 +253,7 @@ EOF
   do
       if mountpoint -q "${ROOTFS}/${i}"; then
         echo "${ROOTFS}/${i} is a mountpoint"
-        umount -lf ${ROOTFS}/$i
+        umount -lf ${ROOTFS}/${i}
       else
         echo "${ROOTFS}/${i} is not a mountpoint"
       fi
