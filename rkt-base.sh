@@ -25,9 +25,10 @@ set -eoux pipefail
 
 export DEBOOTSTRAP=/usr/sbin/debootstrap
 
-export ACI_ARCH='amd64'
+export ACI_ORG='taqtiqa.io'
 export ACI_AUTHOR='TAQTIQA LLC'
 export ACI_EMAIL='coders@taqtiqa.com'
+export ACI_ARCH='amd64'
 
 export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
 
@@ -62,7 +63,6 @@ export CI_SLUG=${TRAVIS_REPO_SLUG:-${DEFAULT_SLUG}}
 export CI=${CI:-${DEFAULT_CI}}
 
 export ACI_NAME=$(basename ${CI_SLUG})  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
-export ACI_ORG=$(dirname ${CI_SLUG})
 
 export BUILD_ARCH=${ACI_ARCH:-${DEFAULT_BUILD_ARCH}}
 export BUILD_ACI_NAME=${ACI_NAME:-${DEFAULT_ACI_NAME}}
