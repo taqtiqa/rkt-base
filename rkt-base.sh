@@ -225,6 +225,10 @@ EOF
   do
       mount -o bind /${i} ${ROOTFS}/${i}
   done
+  if [[ ${BUILD_RELEASE} == 'karmic' ]]; then
+    # See https://bugs.launchpad.net/ubuntu/+source/dbus/+bug/441100
+    mount --bind /var/run/dbus/ ${ROOTFS}/var/run/dbus/
+  fi
   if [[ ${CI} == 'false' ]]; then
     # We are on a desktop so can mount dev/pts
     mount -o bind /${i} ${ROOTFS}/dev/pts
