@@ -31,9 +31,11 @@ export ACI_EMAIL='coders@taqtiqa.com'
 
 export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
 
-if [[ ! -z ${TRAVIS_TAG+x} ]]; then
-#The branch name the tag is on
+if [[ -z ${TRAVIS_TAG+x} ]]; then
 export ACI_RELEASE=$(git branch --contains tags/${TRAVIS_TAG}| grep '[^* ]+' -Eo) # NB: Lower case - this is case sensitive
+else
+# We are in Travis-CI with a detached HEAD - The branch name the tag is on is not available.
+export ACI_RELEASE='travis'
 fi
 
 export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
@@ -105,7 +107,12 @@ case "${BUILD_RELEASE}" in
   hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneric|precise|quantal|raring|saucy|trusty|utopic|vivid|wiley|xenial|yakkety|zesty|angry )
     echo "Building ACI release ${BUILD_VERSION} from branch: ${BUILD_RELEASE}"
     ;;
-  *) echo "Do not build ACI release images from unknown branches" && exit 1
+  travis)
+    echo "Building ACI release ${BUILD_VERSION} from detached head (so no branch information)."
+    ;;
+  *)
+    echo "Do not build ACI release images from unknown branches"
+    exit 1
     ;;
 esac
 
