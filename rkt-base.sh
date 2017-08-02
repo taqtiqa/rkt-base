@@ -27,7 +27,7 @@ export DEBOOTSTRAP=/usr/sbin/debootstrap
 
 export ACI_ARCH='amd64'
 export ACI_AUTHOR='TAQTIQA LLC'
-export ACI_RELEASE='hardy' # NB: Lower case - this is case sensitive
+export ACI_RELEASE='intrepid' # NB: Lower case - this is case sensitive
 export ACI_EMAIL='coders@taqtiqa.com'
 
 export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
@@ -43,7 +43,7 @@ export DEFAULT_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu' #'http://
 export DEFAULT_HOST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
 export DEFAULT_VARIANT='minbase'
 export DEFAULT_ROOTFS='/tmp/rootfs'
-export DEFAULT_RELEASE='hardy'
+export DEFAULT_RELEASE='intrepid'
 export DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/artifacts'}
 export DEFAULT_SLUG='example.com/image-name'
 export DEFAULT_ORG=$(dirname ${DEFAULT_SLUG})
