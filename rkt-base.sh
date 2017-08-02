@@ -33,6 +33,7 @@ export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archiv
 
 # In Travis-CI we have a detached HEAD - The branch name the tag is on is not available.
 export ACI_RELEASE=$(cat ./RELEASE)
+export ACI_RELEASE=$(cat ./RELEASE)
 
 export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
 
@@ -84,8 +85,8 @@ export BUILD_ARTIFACTS_DIR='.'
 export BUILD_ARTIFACT=${BUILD_ARTIFACTS_DIR}/${BUILD_FILE}
 
 REPO_VERSION=$(cat ./VERSION)
-if [[ ${BUILD_VERSION} != ${REPO_VERSION} ]]; then
-  msg "The tag version number and the content of the VERSION file do not match"
+if [[ ${CI_BUILD_VERSION} != ${REPO_VERSION} ]]; then
+  msg "The CI tag version number and the content of the VERSION file do not match"
   exit 1
 fi
 
