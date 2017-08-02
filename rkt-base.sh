@@ -107,7 +107,7 @@ case "${BUILD_RELEASE}" in
     echo "Do not build ACI release images from ${BUILD_RELEASE}"
     exit 1
     ;;
-  hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneric|precise|quantal|raring|saucy|trusty|utopic|vivid|wiley|xenial|yakkety|zesty|angry )
+  hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|trusty|utopic|vivid|wiley|xenial|yakkety|zesty|angry )
     echo "Building ACI release ${BUILD_VERSION} from branch: ${BUILD_RELEASE}"
     ;;
   travis)
