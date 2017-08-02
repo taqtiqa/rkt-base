@@ -4,9 +4,9 @@ Rkt Base Ubuntu
 ## Build steps
 ````bash
 $ RKT_IMAGE='rkt-base'
-$ RKT_IMAGE_BRANCH='hardy'
+$ echo 'update-this' >./RELEASE
+$ echo 'update-this-too' >./VERSION
 $ git clone --depth=1 https://github.com/taqtiqa/${RKT_IMAGE}.git --branch ${RKT_IMAGE_BRANCH} --single-branch
-$ pushd ${RKT_IMAGE}
 $ sudo ./rkt-base.sh
 ````
 
