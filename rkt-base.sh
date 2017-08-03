@@ -107,7 +107,7 @@ case "${BUILD_RELEASE}" in
     echo "Do not build ACI release images from ${BUILD_RELEASE}"
     exit 1
     ;;
-  hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|trusty|utopic|vivid|wily|xenial|yakkety|zesty|angry )
+  hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|trusty|utopic|vivid|wily|xenial|yakkety|zesty|artful )
     echo "Building ACI release ${BUILD_VERSION} from branch: ${BUILD_RELEASE}"
     ;;
   travis)
@@ -120,7 +120,7 @@ case "${BUILD_RELEASE}" in
 esac
 
 case "${BUILD_RELEASE}" in
-  trusty|vivid|wily|xenial|yakkety|zesty|angry)
+  trusty|vivid|wily|xenial|yakkety|zesty|artful)
     BUILD_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
     echo "Ubuntu mirror changed via BUILD_GUEST_PACKAGE_MIRROR=${BUILD_GUEST_PACKAGE_MIRROR}"
     ;;
