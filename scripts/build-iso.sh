@@ -185,10 +185,10 @@ case "${DISTRIB_CODENAME}" in
     cp /usr/lib/syslinux/isolinux.bin image/isolinux/
     cp /usr/lib/syslinux/menu.c32 image/isolinux/
     cp /usr/share/live/images/standard/config/bootloaders/isolinux/hdt.c32 image/isolinux/
-    cp /usr/share/live/images/rescue/config/bootloaders/isolinux/ldlinux.c32 image/isolinux/
-    cp /usr/share/live/images/rescue/config/bootloaders/isolinux/libutil.c32 image/isolinux/
+    cp /usr/share/live/images/standard/config/bootloaders/isolinux/ldlinux.c32 image/isolinux/
+    cp /usr/share/live/images/standard/config/bootloaders/isolinux/libutil.c32 image/isolinux/
     #cp /usr/lib/syslinux/libmenu.c32 image/isolinux/
-    cp /usr/share/live/images/rescue/config/bootloaders/isolinux/libcom32.c32 image/isolinux/
+    cp /usr/share/live/images/standard/config/bootloaders/isolinux/libcom32.c32 image/isolinux/
     #cp /usr/lib/syslinux/libgpl.c32 image/isolinux/
     ;;
   *)
