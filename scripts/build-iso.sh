@@ -169,7 +169,16 @@ case "${BUILD_RELEASE}" in
     ;;
 esac
 
-cp /usr/lib/ISOLINUX/isolinux.bin image/isolinux/
+case "${BUILD_RELEASE}" in
+  xenial|zesty)
+    echo 'Xenial | Zesty locations for isolinux.bin are different.'
+    cp /usr/lib/ISOLINUX/isolinux.bin image/isolinux/
+    ;;
+  *)
+    cp /usr/lib/isolinux/isolinux.bin image/isolinux/
+    ;;
+esac
+
 cp /usr/lib/syslinux/modules/bios/menu.c32 image/isolinux/
 cp /usr/lib/syslinux/modules/bios/hdt.c32 image/isolinux/
 cp /usr/lib/syslinux/modules/bios/ldlinux.c32 image/isolinux/
