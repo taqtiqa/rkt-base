@@ -159,7 +159,7 @@ DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt";};
 Dir::Etc::SourceList "/etc/apt/sources.list";
 EOF
 
-  # Do not mount dev/pts until to this issue is resolved
+  # Do not mount dev/pts until this issue is resolved
   # ISSUE:
   # https://github.com/travis-ci/travis-ci/issues/8187
   #
@@ -176,6 +176,7 @@ EOF
     # We are on a desktop so can mount dev/pts
     mount -o bind /${i} ${ROOTFS}/dev/pts
   fi
+  chroot ${ROOTFS} echo 'taqtiqa.io/rkt-base' > /etc/hostname
   chroot ${ROOTFS} echo 'debconf debconf/frontend select Noninteractive' | chroot ${ROOTFS} debconf-set-selections
   chroot ${ROOTFS} dpkg-reconfigure debconf
   chroot ${ROOTFS} echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
