@@ -226,7 +226,7 @@ DEFAULT live
 LABEL live
   menu label ^Start or install Ubuntu Remix
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.gz quiet splash --
+  append  file=/cdrom/preseed/ubuntu.seed boot=casper persistent initrd=/casper/initrd.gz quiet splash --
 LABEL check
   menu label ^Check CD for defects
   kernel /casper/vmlinuz
@@ -265,7 +265,7 @@ DEFAULT live
 LABEL live
   menu label ^Start or install Ubuntu Remix
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash --
+  append  file=/cdrom/preseed/ubuntu.seed boot=casper persistent initrd=/casper/initrd.gz quiet splash --
 LABEL check
   menu label ^Check CD for defects
   kernel /casper/vmlinuz
