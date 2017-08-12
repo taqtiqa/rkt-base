@@ -18,7 +18,6 @@
 #
 set -eoux pipefail
 
-
 if [ "${RKT_BUILD_ENV}" -ne 'true' ]; then
   echo 'This script requires environment variables setup by build-env.sh'
   exit 1
