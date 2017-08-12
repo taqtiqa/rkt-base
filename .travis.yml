@@ -32,7 +32,7 @@ env:
   global:
     - secure: KRkVbsBepMb7gG10l6ZzsH+/VzDRH8j4QLVWXSyuECMv36Hpu1GHoLPITz57qmwkgfrddZ8gABvjuvltXQISP+2QKc5+oD4DWTfYYl3wYFwc4L2Y4UpkWDE6pKLDrI/veFVGjOn2RVLP+Ensrk13SzCKDy/eBrQ9ty4kFrNldls1blsT5QVr6AyC2oi0Lufyk5h07QqCt55PXPto5VhTRQTHSsT9g46JnFQVfhfpchNmy6I9CNDFs6G9uWjwxKMjk+Mkev1h9aTCe3aCH4IA+kWB/EUsR6sr2QoObtMocg8ZvVKA2BZzB2ruXWd+nroZpSK3RGHSAjVPoshqqsjZu5rzs4PlZtRvHlds6iFq0Vj/ojq7lDS6WHJJaWtc4So6EsOzze3LuHCHZarZaw69ws5L/jHbtERGfiaW8SSHdCeu1A4aUklW9uZxkO+f1RAFMub6VSLlVzDPHavgpmyyFzh0YKnIcfNwScyM8YfAwe72GkR6QzvenzHSUQySygvBK/tuAbI4PUbhd1habpAqAT0cs05cw4J38+ADK2XuQawzlyH2PAcDqk0LB3pgo23fJxgCrhsDttxuP3ueG5kheyKciQcfFcQrq7zd2ix+c8LBU6KkAVT72SnYjFjWZbcR2OtqlG4endSZznYuL4ue4PCGLiJTYW8Xfju+hWIRHJI=
   matrix:
-    - ARCH=amd64 ACI_NAME=$(basename $TRAVIS_REPO_SLUG)
+    - ARCH=amd64 ACI_NAME=$(basename $TRAVIS_REPO_SLUG) ACI_ORG=$(dirname $TRAVIS_REPO_SLUG)
 
 before_install:
   - git clone https://github.com/taqtiqa/ci.git
@@ -56,13 +56,14 @@ after_success:
         echo "This will not run on tag triggered build!"
       fi
 # Deploy only builds with release semantic version numbers
-# Example: 1.2.3+4 BUT NOT 1.2.3-4 or 1.2.3-2+4
+# Example: 1.2.3.4 BUT NOT 1.2.3-4 or 1.2.3-2+4
 deploy:
   - provider: releases
     api_key: ${GH_PA_TOKEN}
     file:
       - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
       - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
+      - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.iso"
     skip_cleanup: true
     overwrite: true
     on:

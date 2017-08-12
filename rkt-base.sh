@@ -71,6 +71,39 @@ function buildcleanup() {
   # ISSUE:
   # https://github.com/travis-ci/travis-ci/issues/8187
   # "${ROOTFS}/dev/pts" Dismount order matters
+
+  # Cleanup by dismounting as ACBuild expects us to have.
+  # Otherwise $ACBUILD begin ${ROOTFS} complains:
+  #
+  #  $ begin: build already in progress in this working dir
+  #
+  # See:
+  # - https://github.com/containers/build/issues/167
+  # - https://askubuntu.com/questions/551195/scripting-chroot-how-to
+  #
+  # Do not mount dev/pts until to this issue is resolved
+  # ISSUE:
+  # https://github.com/travis-ci/travis-ci/issues/8187
+  #
+  # dev/pts should be dismounted first
+  if [[ ${CI} == 'false' ]]; then
+    # We are on a desktop so can dismount dev/pts
+    if mountpoint -q "${ROOTFS}/dev/pts"; then
+      echo "${ROOTFS}/dev/pts is a mountpoint"
+      umount -lf ${ROOTFS}/dev/pts
+    else
+      echo "${ROOTFS}/dev/pts is not a mountpoint"
+    fi
+  fi
+  for i in proc sys dev
+  do
+      if mountpoint -q "${ROOTFS}/${i}"; then
+        echo "${ROOTFS}/${i} is a mountpoint"
+        umount -lf ${ROOTFS}/${i}
+      else
+        echo "${ROOTFS}/${i} is not a mountpoint"
+      fi
+  done
   rry=( "${ROOTFS}/proc" "${ROOTFS}/sys" "${ROOTFS}/dev" )
   for mp in "${rry[@]}"
   do
@@ -176,10 +209,10 @@ EOF
     # We are on a desktop so can mount dev/pts
     mount -o bind /${i} ${ROOTFS}/dev/pts
   fi
-  chroot ${ROOTFS} echo 'taqtiqa.io/rkt-base' > /etc/hostname
+  chroot ${ROOTFS} /bin/bash -c "echo 'rkt-base' > /etc/hostname"
   chroot ${ROOTFS} echo 'debconf debconf/frontend select Noninteractive' | chroot ${ROOTFS} debconf-set-selections
   chroot ${ROOTFS} dpkg-reconfigure debconf
-  chroot ${ROOTFS} echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
+  chroot ${ROOTFS} /bin/bash -c "echo 'en_US.UTF-8 UTF-8' >>/etc/locale.gen"
   chroot ${ROOTFS} dpkg-reconfigure locales
   chroot ${ROOTFS} apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B187F352479B857B
   chroot ${ROOTFS} apt-get -qq update
@@ -223,6 +256,8 @@ fi
 
 echo "Finished ${BUILD_RELEASE} rootfs build."
 
+source 'scripts/build-iso.sh'
+
 echo 'Display installed acbuild version'
 ${ACBUILD} version
 
@@ -250,3 +285,4 @@ ${ACBUILD} end
 echo "Sign the Container Image..."
 ./scripts/sign.sh ${BUILD_ARTIFACT}
 echo "Signed the Container Image..."
+rm -rf image

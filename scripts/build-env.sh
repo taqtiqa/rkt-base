@@ -1,6 +1,25 @@
 #!/usr/bin/env bash
+#
+# Copyright (C) 2017 TAQTIQA LLC. <http://www.taqtiqa.com>
+#
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License v3
+#along with this program.
+#If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
+#
 
 set -eoux pipefail
+
+export RKT_BUILD_ENV='true'
 
 export DEBOOTSTRAP=/usr/sbin/debootstrap
 
@@ -12,7 +31,6 @@ export ACI_ARCH='amd64'
 export CI_PACKAGE_MIRROR='http://old-releases.ubuntu.com/ubuntu' # http://archive.ubuntu.com/ubuntu
 
 # In Travis-CI we have a detached HEAD - The branch name the tag is on is not available.
-export ACI_RELEASE=$(cat ./RELEASE)
 export ACI_RELEASE=$(cat ./RELEASE)
 
 export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
@@ -59,9 +77,9 @@ export BUILD_SLUG=${DEFAULT_SLUG}
 export BUILD_VARIANT=${ACI_VARIANT:-${DEFAULT_VARIANT}}
 export BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
 
-export BUILD_FILE=${BUILD_ACI_NAME}-${BUILD_VERSION}-linux-${BUILD_ARCH}.aci
+export BUILD_FILE=${BUILD_ACI_NAME}-${BUILD_VERSION}-linux-${BUILD_ARCH}
 export BUILD_ARTIFACTS_DIR='.'
-export BUILD_ARTIFACT=${BUILD_ARTIFACTS_DIR}/${BUILD_FILE}
+export BUILD_ARTIFACT=${BUILD_ARTIFACTS_DIR}/${BUILD_FILE}.aci
 
 REPO_VERSION=$(cat ./VERSION)
 if [[ ${CI_BUILD_VERSION} != ${REPO_VERSION} ]]; then
