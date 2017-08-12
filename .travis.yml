@@ -47,9 +47,9 @@ script:
   - cat ./rkt-base.sh | sudo bash
 
 # Deploy public key to gh-pages
-after_success:
+after_deploy:
   - |
-      if [ ! -z "${TRAVIS_TAG}" ] && [ $TRAVIS_TAG =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$ ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+      if [[ ! -z ${TRAVIS_TAG} ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
         echo "This will run on tag triggered build!"
         cat ./scripts/push-gh-pages.sh | bash
       else
