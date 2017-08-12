@@ -19,6 +19,8 @@
 
 set -eoux pipefail
 
+source /etc/lsb-release
+
 export RKT_BUILD_ENV='true'
 
 export DEBOOTSTRAP=/usr/sbin/debootstrap

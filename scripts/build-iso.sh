@@ -169,23 +169,34 @@ case "${BUILD_RELEASE}" in
     ;;
 esac
 
-case "${BUILD_RELEASE}" in
-  xenial|zesty)
+case "${DISTRIB_CODENAME}" in
+  xenial)
     echo 'Xenial | Zesty locations for isolinux.bin are different.'
     cp /usr/lib/ISOLINUX/isolinux.bin image/isolinux/
+    cp /usr/lib/syslinux/modules/bios/menu.c32 image/isolinux/
+    cp /usr/lib/syslinux/modules/bios/hdt.c32 image/isolinux/
+    cp /usr/lib/syslinux/modules/bios/ldlinux.c32 image/isolinux/
+    cp /usr/lib/syslinux/modules/bios/libutil.c32 image/isolinux/
+    cp /usr/lib/syslinux/modules/bios/libmenu.c32 image/isolinux/
+    cp /usr/lib/syslinux/modules/bios/libcom32.c32 image/isolinux/
+    cp /usr/lib/syslinux/modules/bios/libgpl.c32 image/isolinux/
+    ;;
+  trusty)
+    cp /usr/lib/syslinux/isolinux.bin image/isolinux/
+    cp /usr/lib/syslinux/menu.c32 image/isolinux/
+    cp /usr/share/live/images/standard/config/bootloaders/isolinux/hdt.c32 image/isolinux/
+    cp /usr/share/live/images/rescue/config/bootloaders/isolinux/ldlinux.c32 image/isolinux/
+    cp /usr/share/live/images/rescue/config/bootloaders/isolinux/libutil.c32 image/isolinux/
+    #cp /usr/lib/syslinux/libmenu.c32 image/isolinux/
+    cp /usr/share/live/images/rescue/config/bootloaders/isolinux/libcom32.c32 image/isolinux/
+    #cp /usr/lib/syslinux/libgpl.c32 image/isolinux/
     ;;
   *)
-    cp /usr/lib/isolinux/isolinux.bin image/isolinux/
+    echo 'Building on an unknown host environment.'
+    exit 1
     ;;
 esac
 
-cp /usr/lib/syslinux/modules/bios/menu.c32 image/isolinux/
-cp /usr/lib/syslinux/modules/bios/hdt.c32 image/isolinux/
-cp /usr/lib/syslinux/modules/bios/ldlinux.c32 image/isolinux/
-cp /usr/lib/syslinux/modules/bios/libutil.c32 image/isolinux/
-cp /usr/lib/syslinux/modules/bios/libmenu.c32 image/isolinux/
-cp /usr/lib/syslinux/modules/bios/libcom32.c32 image/isolinux/
-cp /usr/lib/syslinux/modules/bios/libgpl.c32 image/isolinux/
 cp /usr/share/misc/pci.ids image/isolinux/
 cp /boot/memtest86+.bin image/install/memtest
 
