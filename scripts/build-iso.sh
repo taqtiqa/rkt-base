@@ -71,7 +71,7 @@ case "${BUILD_RELEASE}" in
     echo "Do not disable services"
     ;;
 esac
-chroot ${ROOTFS} apt-get install --yes ubuntu-standard casper lupin-casper syslinux
+chroot ${ROOTFS} apt-get install --yes ubuntu-standard casper lupin-casper
 # Before Maverick, discover was named discover1.
 case "${BUILD_RELEASE}" in
   hardy|intrepid|jaunty|karmic)
@@ -81,7 +81,7 @@ case "${BUILD_RELEASE}" in
     chroot ${ROOTFS} apt-get install --yes discover1 grub2 plymouth-x11
     ;;
   xenial|zesty|artful)
-    chroot ${ROOTFS} apt-get install --yes isolinux
+    chroot ${ROOTFS} apt-get install --yes discover
     ;;
   *)
     chroot ${ROOTFS} apt-get install --yes discover
