@@ -200,9 +200,7 @@ cp /usr/share/misc/pci.ids image/isolinux/
 cp /boot/memtest86+.bin image/install/memtest
 
 cat << EOF > image/isolinux/isolinux.txt
-splash.rle
-
-************************************************************************
+*******************************************************************************
 
 Ubuntu Remix Live ISO by:
 
@@ -214,9 +212,11 @@ Ubuntu Remix Live ISO by:
    ##  ##     ## ##    ##     ##     ##  ##    ##  ##     ## ###  ##  ##     ##
    ##  ##     ##  ##### ##    ##    ####  ##### ## ##     ## ### ####  #######
 
-For the default live system, enter "live".  For memtest86+, enter "memtest"
+For the default live system, enter "live".  For memtest86+, enter "memtest".
+For hardware detection tool, enter "hdt".  For ISO defect check, enter "check".
+To boot from the first hard disk, enter "hd".
 
-************************************************************************
+*******************************************************************************
 EOF
 
 case "${BUILD_RELEASE}" in
