@@ -108,9 +108,9 @@ case "${BUILD_RELEASE}" in
     echo 'Nothing installed'
     ;;
 esac
-chroot ${ROOTFS} groupadd rkt
-chroot ${ROOTFS} gpasswd -a root rkt
-chroot ${ROOTFS} gpasswd -a ubuntu rkt
+chroot ${ROOTFS} $( $(getent group rkt) || groupadd rkt )
+chroot ${ROOTFS} gpasswd --add root rkt
+chroot ${ROOTFS} gpasswd --add ubuntu rkt
 chroot ${ROOTFS} ./dist/scripts/setup-data-dir.sh
 # Manually add the key from taqtiqa.io
 fpr=$(gpg --no-tty --no-default-keyring --no-auto-check-trustdb --with-colons --with-fingerprint ./${BUILD_ACI_NAME}-publickeys.asc 2>/dev/null |grep fpr|cut -d':' -f10| tr '[:upper:]' '[:lower:]')
