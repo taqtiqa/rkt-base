@@ -153,6 +153,7 @@ ${ACBUILD} annotation add created "$( date --rfc-3339=seconds | sed 's/ /T/' )"
 ${ACBUILD} set-user 0
 ${ACBUILD} set-group 0
 ${ACBUILD} environment add OS_VERSION ${BUILD_RELEASE}
+${ACBUILD} mount add dbus /etc/machine-id
 
 echo "Write the Container Image..."
 ${ACBUILD} write --overwrite ${BUILD_ARTIFACT}

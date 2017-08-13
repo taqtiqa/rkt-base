@@ -18,8 +18,8 @@
 #
 set -eoux pipefail
 
-TMP_PRIVATE_KEYRING="./scripts/rkt.sec"
-TMP_PUBLIC_KEYRING="./scripts/rkt.pub"
+TMP_PRIVATE_KEYRING="./rkt.sec"
+TMP_PUBLIC_KEYRING="./rkt.pub"
 
 if [ "${RKT_BUILD_ENV}" -ne 'true' ]; then
   echo 'This script requires environment variables setup by build-env.sh'
