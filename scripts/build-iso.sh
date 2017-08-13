@@ -108,6 +108,7 @@ case "${BUILD_RELEASE}" in
     echo 'Nothing installed'
     ;;
 esac
+chroot ${ROOTFS} $( id -u ubuntu &>/dev/null || useradd ubuntu -s /bin/bash -p '*' )
 chroot ${ROOTFS} $( $(getent group rkt) || groupadd rkt )
 chroot ${ROOTFS} gpasswd --add root rkt
 chroot ${ROOTFS} gpasswd --add ubuntu rkt
