@@ -100,18 +100,18 @@ chroot ${ROOTFS} wget https://github.com/rkt/rkt/releases/download/${RKT_VERSION
 #chroot ${ROOTFS} wget https://github.com/rkt/rkt/releases/download/${RKT_VERSION_URI}/rkt_${RKT_VERSION}_amd64.deb.asc
 #chroot ${ROOTFS} ( gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --verify rkt_${RKT_VERSION}_amd64.deb.asc ) && dpkg -i rkt_${RKT_VERSION}_amd64.deb
 chroot ${ROOTFS} dpkg -i rkt_${RKT_VERSION}_amd64.deb
-case "${BUILD_RELEASE}" in
-  hardy|lucid|precise|trusty|xenial)
-    echo 'Nothing installed'
-    ;;
-  *)
-    echo 'Nothing installed'
-    ;;
-esac
-chroot ${ROOTFS} $( id -u ubuntu &>/dev/null || useradd ubuntu -s /bin/bash -p '*' )
+#case "${BUILD_RELEASE}" in
+#  hardy|lucid|precise|trusty|xenial)
+#    echo 'Nothing installed'
+#    ;;
+#  *)
+#    echo 'Nothing installed'
+#    ;;
+#esac
+#chroot ${ROOTFS} $( id -u ubuntu &>/dev/null || useradd ubuntu -s /bin/bash -p '*' )
 chroot ${ROOTFS} $( $(getent group rkt) || groupadd rkt )
 chroot ${ROOTFS} gpasswd --add root rkt
-chroot ${ROOTFS} gpasswd --add ubuntu rkt
+#chroot ${ROOTFS} gpasswd --add ubuntu rkt
 chroot ${ROOTFS} ./dist/scripts/setup-data-dir.sh
 # Manually add the key from taqtiqa.io
 fpr=$(gpg --no-tty --no-default-keyring --no-auto-check-trustdb --with-colons --with-fingerprint ./${BUILD_ACI_NAME}-publickeys.asc 2>/dev/null |grep fpr|cut -d':' -f10| tr '[:upper:]' '[:lower:]')
