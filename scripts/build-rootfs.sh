@@ -107,9 +107,11 @@ EOF
   chroot ${ROOTFS} apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B187F352479B857B
   chroot ${ROOTFS} apt-get -qq update
   chroot ${ROOTFS} apt-get -y -f -V dist-upgrade
-  chroot ${ROOTFS} apt-get --purge -y autoremove
+  chroot ${ROOTFS} update-ca-certificates --verbose --fresh
   chroot ${ROOTFS} apt-get --purge -y autoremove
   chroot ${ROOTFS} apt-get clean
+  chroot ${ROOTFS} rm -rf /tmp/*
+  chroot ${ROOTFS} rm -f /etc/resolv.conf
   # Cleanup by dismounting as ACBuild expects us to have.
   # Otherwise $ACBUILD begin ${ROOTFS} complains:
   #
