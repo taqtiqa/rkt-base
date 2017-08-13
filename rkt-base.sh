@@ -163,6 +163,15 @@ echo "Sign the Container Image..."
 ./scripts/sign.sh ${BUILD_ARTIFACT}
 echo "Signed the Container Image..."
 
-source 'scripts/build-iso.sh'
+case "${BUILD_RELEASE}" in
+  trusty|xenial)
+    echo "Build ISO for use as rkt container host by remixing: ${BUILD_RELEASE} ${BUILD_VERSION}"
+    source 'scripts/build-iso.sh'
+    ;;
+  *)
+    echo 'Not a LTS release - no ISO is built. Redirect to a xenial ISO.'
+    cp ./scripts/iso-redirects.html ${BUILD_FILE}.iso
+    ;;
+esac
 
 rm -rf image

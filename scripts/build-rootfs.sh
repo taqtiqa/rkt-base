@@ -103,9 +103,15 @@ EOF
   chroot ${ROOTFS} echo 'debconf debconf/frontend select Noninteractive' | chroot ${ROOTFS} debconf-set-selections
   chroot ${ROOTFS} dpkg-reconfigure debconf
   chroot ${ROOTFS} /bin/bash -c "echo 'en_US.UTF-8 UTF-8' >>/etc/locale.gen"
+  chroot ${ROOTFS} usermod --login taqtiqa --home /home/taqtiqa --comment "TAQTIQA" --move-home ubuntu
+  chroot ${ROOTFS} groupmod --new-name taqtiqa ubuntu
+  chroot ${ROOTFS} userdel --force ubuntu
+  chroot ${ROOTFS} groupdel ubuntu
+  chroot ${ROOTFS} rm -rf /home/ubuntu
   chroot ${ROOTFS} dpkg-reconfigure locales
   chroot ${ROOTFS} apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B187F352479B857B
   chroot ${ROOTFS} apt-get -qq update
+  chroot ${ROOTFS} apt-get install --yes ${BUILD_GUEST_ENHANCED_PACKAGES}
   chroot ${ROOTFS} apt-get -y -f -V dist-upgrade
   chroot ${ROOTFS} update-ca-certificates --verbose --fresh
   chroot ${ROOTFS} apt-get --purge -y autoremove

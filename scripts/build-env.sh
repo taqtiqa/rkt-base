@@ -22,6 +22,8 @@ set -eoux pipefail
 source /etc/lsb-release
 
 export RKT_BUILD_ENV='true'
+export RKT_VERSION_URI='v1.28.1'
+export RKT_VERSION='1.28.1-1'
 
 export DEBOOTSTRAP=/usr/sbin/debootstrap
 
@@ -82,6 +84,9 @@ export BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
 export BUILD_FILE=${BUILD_ACI_NAME}-${BUILD_VERSION}-linux-${BUILD_ARCH}
 export BUILD_ARTIFACTS_DIR='.'
 export BUILD_ARTIFACT=${BUILD_ARTIFACTS_DIR}/${BUILD_FILE}.aci
+
+# Enhanced packages MUST still come from repositories in /etc/sources.list
+export BUILD_GUEST_ENHANCED_PACKAGES='pastebinit less'
 
 REPO_VERSION=$(cat ./VERSION)
 if [[ ${CI_BUILD_VERSION} != ${REPO_VERSION} ]]; then
