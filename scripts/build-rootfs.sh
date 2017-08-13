@@ -106,10 +106,16 @@ EOF
   chroot ${ROOTFS} dpkg-reconfigure locales
   chroot ${ROOTFS} apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B187F352479B857B
   chroot ${ROOTFS} apt-get -qq update
+  chroot ${ROOTFS} apt-get install --yes ${BUILD_GUEST_ENHANCED_PACKAGES}
   chroot ${ROOTFS} apt-get -y -f -V dist-upgrade
   chroot ${ROOTFS} update-ca-certificates --verbose --fresh
   chroot ${ROOTFS} apt-get --purge -y autoremove
   chroot ${ROOTFS} apt-get clean
+#  chroot ${ROOTFS} usermod --login taqtiqa --home /home/taqtiqa --comment "TAQTIQA" --move-home ubuntu
+#  chroot ${ROOTFS} groupmod --new-name taqtiqa ubuntu
+#  chroot ${ROOTFS} userdel --force ubuntu
+#  chroot ${ROOTFS} groupdel ubuntu
+#  chroot ${ROOTFS} rm -rf /home/ubuntu
   chroot ${ROOTFS} rm -rf /tmp/*
   chroot ${ROOTFS} rm -f /etc/resolv.conf
   # Cleanup by dismounting as ACBuild expects us to have.

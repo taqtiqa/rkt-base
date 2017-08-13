@@ -90,6 +90,30 @@ esac
 chroot ${ROOTFS} apt-get install --yes laptop-detect os-prober
 chroot ${ROOTFS} apt-get install --yes linux-generic
 
+# Install Rkt specific packages and configuration
+chroot ${ROOTFS} apt-get install --yes cgroup-lite
+chroot ${ROOTFS} gpg --recv-key 18AD5014C99EF7E3BA5F6CE950BDD3E0FC8A365E
+chroot ${ROOTFS} wget https://github.com/rkt/rkt/releases/download/${RKT_VERSION_URI}/rkt_${RKT_VERSION}_amd64.deb
+chroot ${ROOTFS} wget https://github.com/rkt/rkt/releases/download/${RKT_VERSION_URI}/rkt_${RKT_VERSION}_amd64.deb.asc
+chroot ${ROOTFS} gpg --verify rkt_${RKT_VERSION}_amd64.deb.asc
+chroot ${ROOTFS} dpkg -i rkt_${RKT_VERSION}_amd64.deb
+case "${BUILD_RELEASE}" in
+  hardy|lucid|precise|trusty|xenial)
+    echo 'Nothing installed'
+    ;;
+  *)
+    echo 'Nothing installed'
+    ;;
+esac
+chroot ${ROOTFS} groupadd rkt
+chroot ${ROOTFS} gpasswd -a root rkt
+chroot ${ROOTFS} gpasswd -a ubuntu rkt
+chroot ${ROOTFS} ./dist/scripts/setup-data-dir.sh
+# Manually add the key from taqtiqa.io
+fpr=$(gpg --no-tty --no-default-keyring --no-auto-check-trustdb --with-colons --with-fingerprint ./${BUILD_ACI_NAME}-publickeys.asc 2>/dev/null |grep fpr|cut -d':' -f10| tr '[:upper:]' '[:lower:]')
+chroot ${ROOTFS} mkdir -p /etc/rkt/trustedkeys/prefix.d/${BUILD_ORG}/${BUILD_ACI_NAME}
+chroot ${ROOTFS} mv ${BUILD_ACI_NAME}-publickeys.asc /etc/rkt/trustedkeys/prefix.d/${BUILD_ORG}/${BUILD_ACI_NAME}/${fpr}
+
 chroot ${ROOTFS} rm -f /var/lib/dbus/machine-id
 # NOTE:  The following are required prior to leaving the chroot area to prepare
 #        the chroot environment as a Live ISO
@@ -157,7 +181,7 @@ done
 
 # Create the Cd Image Directory and Populate it
 mkdir -p image/{casper,isolinux,install}
-cp $ROOTFS/boot/vmlinuz-**-generic image/casper/vmlinuz
+cp ${ROOTFS}/boot/vmlinuz-**-generic image/casper/vmlinuz
 case "${BUILD_RELEASE}" in
   hardy|intrepid|jaunty)
     cp ${ROOTFS}/boot/initrd.img-**-generic image/casper/initrd.gz
@@ -200,6 +224,7 @@ cp /usr/share/misc/pci.ids image/isolinux/
 cp /boot/memtest86+.bin image/install/memtest
 
 cat << EOF > image/isolinux/isolinux.txt
+splash.rle
 *******************************************************************************
 
 Ubuntu Remix Live ISO by:
@@ -302,7 +327,7 @@ esac
 # Create manifest:
 chroot ${ROOTFS} dpkg-query -W --showformat='${Package} ${Version}\n' | tee image/casper/filesystem.manifest
 cp -v image/casper/filesystem.manifest image/casper/filesystem.manifest-desktop
-REMOVE='ubiquity ubiquity-frontend-gtk ubiquity-frontend-kde casper lupin-casper live-initramfs user-setup discover1 xresprobe os-prober libdebian-installer4'
+REMOVE='ubiquity ubiquity-frontend-gtk ubiquity-frontend-kde casper lupin-casper live-initramfs user-setup discover1 discover xresprobe os-prober libdebian-installer4'
 for i in $REMOVE; do
   sed -i "/${i}/d" image/casper/filesystem.manifest-desktop
 done
@@ -329,9 +354,10 @@ touch image/ubuntu
 mkdir -p image/.disk
 cd image/.disk
   touch base_installable
-  echo "full_cd/single" > cd_type
-  echo "Ubuntu Remix ${CI_BUILD_VERSION}" > info  # Update version number to match your OS version
-  echo "https://taqtiqa.io/posts/rkt-base" > release_notes_url
+  echo 'full_cd/single' > cd_type
+  echo "Ubuntu Remix by TAQTIQA.IO ${BUILD_VERSION}" > info  # Update version number to match your OS version
+  echo "https://taqtiqa.io/posts/${BUILD_ACI_NAME}" > release_notes_url
+  find . -type f -print0 | xargs -0 md5sum | grep -v "\./md5sum.txt" > md5sum.txt
 cd ../..
 
 # Calculate  of everything except the file md5sum.txt
