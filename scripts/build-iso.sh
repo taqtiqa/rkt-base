@@ -95,10 +95,11 @@ chroot ${ROOTFS} apt-get install --yes linux-generic
 
 # Install Rkt specific packages and configuration
 chroot ${ROOTFS} apt-get install --yes cgroup-lite
-chroot ${ROOTFS} gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --keyserver pgp.mit.edu --recv-key 18AD5014C99EF7E3BA5F6CE950BDD3E0FC8A365E
+#chroot ${ROOTFS} gpg --no-tty --no-default-keyring --batch --with-colons --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --keyserver pgp.mit.edu --recv-key 18AD5014C99EF7E3BA5F6CE950BDD3E0FC8A365E
 chroot ${ROOTFS} wget https://github.com/rkt/rkt/releases/download/${RKT_VERSION_URI}/rkt_${RKT_VERSION}_amd64.deb
-chroot ${ROOTFS} wget https://github.com/rkt/rkt/releases/download/${RKT_VERSION_URI}/rkt_${RKT_VERSION}_amd64.deb.asc
-chroot ${ROOTFS} ( gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --verify rkt_${RKT_VERSION}_amd64.deb.asc ) && dpkg -i rkt_${RKT_VERSION}_amd64.deb
+#chroot ${ROOTFS} wget https://github.com/rkt/rkt/releases/download/${RKT_VERSION_URI}/rkt_${RKT_VERSION}_amd64.deb.asc
+#chroot ${ROOTFS} ( gpg --no-tty --no-default-keyring --secret-keyring ${TMP_PRIVATE_KEYRING} --keyring ${TMP_PUBLIC_KEYRING} --verify rkt_${RKT_VERSION}_amd64.deb.asc ) && dpkg -i rkt_${RKT_VERSION}_amd64.deb
+chroot ${ROOTFS} dpkg -i rkt_${RKT_VERSION}_amd64.deb
 case "${BUILD_RELEASE}" in
   hardy|lucid|precise|trusty|xenial)
     echo 'Nothing installed'
