@@ -116,7 +116,7 @@ chroot ${ROOTFS} gpasswd --add root rkt
 # Manually add the key from taqtiqa.io
 fpr=$(gpg --no-tty --no-default-keyring --no-auto-check-trustdb --with-colons --with-fingerprint ./${BUILD_ACI_NAME}-publickeys.asc 2>/dev/null |grep fpr|cut -d':' -f10| tr '[:upper:]' '[:lower:]')
 chroot ${ROOTFS} mkdir -p /etc/rkt/trustedkeys/prefix.d/${BUILD_ORG}/${BUILD_ACI_NAME}
-chroot ${ROOTFS} mv ${BUILD_ACI_NAME}-publickeys.asc /etc/rkt/trustedkeys/prefix.d/${BUILD_ORG}/${BUILD_ACI_NAME}/${fpr}
+chroot ${ROOTFS} mv ./${BUILD_ACI_NAME}-publickeys.asc /etc/rkt/trustedkeys/prefix.d/${BUILD_ORG}/${BUILD_ACI_NAME}/${fpr}
 
 chroot ${ROOTFS} rm -f /var/lib/dbus/machine-id
 # NOTE:  The following are required prior to leaving the chroot area to prepare
