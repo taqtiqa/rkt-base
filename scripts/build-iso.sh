@@ -112,7 +112,7 @@ chroot ${ROOTFS} dpkg -i rkt_${RKT_VERSION}_amd64.deb
 chroot ${ROOTFS} $( $(getent group rkt) || groupadd rkt )
 chroot ${ROOTFS} gpasswd --add root rkt
 #chroot ${ROOTFS} gpasswd --add ubuntu rkt
-chroot ${ROOTFS} ./dist/scripts/setup-data-dir.sh
+#chroot ${ROOTFS} /github/rkt/dist/scripts/setup-data-dir.sh /var/lib/rkt
 # Manually add the key from taqtiqa.io
 fpr=$(gpg --no-tty --no-default-keyring --no-auto-check-trustdb --with-colons --with-fingerprint ./${BUILD_ACI_NAME}-publickeys.asc 2>/dev/null |grep fpr|cut -d':' -f10| tr '[:upper:]' '[:lower:]')
 chroot ${ROOTFS} mkdir -p /etc/rkt/trustedkeys/prefix.d/${BUILD_ORG}/${BUILD_ACI_NAME}
