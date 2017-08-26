@@ -11,12 +11,16 @@
 /tmp/
 /.idea/
 
+# Specific to ACI creation
 *-secret
 *-signingkey.pem
 *-privatekeys.gpg
 *-privatekeys.asc
 *-privatekeyring.gpg
 *-publickeyring.gpg
+
+*.aci
+*.aci.asc
 
 travis-todo.yml
 
