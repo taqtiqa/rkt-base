@@ -40,7 +40,7 @@ export ACI_RELEASE=$(cat ./RELEASE)
 export CI_ARTIFACTS_DIR="/tmp/${ACI_RELEASE}"
 
 export DEFAULT_BUILD_ARCH='amd64'
-export DEFAULT_BUILD_VERSION='0.0.0-0'
+export DEFAULT_BUILD_VERSION=$(cat ./VERSION)
 export DEFAULT_CI='false'
 export DEFAULT_COMPONENTS='main,universe,multiverse,restricted'
 export DEFAULT_GUEST_PACKAGES='ca-certificates,gnupg,dirmngr,busybox,network-manager,apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
@@ -90,7 +90,7 @@ export BUILD_GUEST_ENHANCED_PACKAGES='pastebinit less'
 
 REPO_VERSION=$(cat ./VERSION)
 if [[ ${CI_BUILD_VERSION} != ${REPO_VERSION} ]]; then
-  msg "The CI tag version number and the content of the VERSION file do not match"
+  echo "The CI tag version number and the content of the VERSION file do not match"
   exit 1
 fi
 
