@@ -24,28 +24,15 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-if [[ $# -lt 3 ]] ; then
-  echo "Usage: build-package <app-name> <pkg-version> <app-version>"
+if [[ $# -gt 1 ]] ; then
+  echo "Usage: update-apt-local-archive.sh <optional-folder-path>"
   exit 1
 fi
 
-PKG_NAME=$1
-PKG_VERSION=$2
-APP_VERSION=$3
+APT_LOCAL_ARCHIVE=${1:-/usr/local/apt/archives}
 
-APT_LOCAL_ARCHIVE=/usr/local/apt/archives
-
-mkdir -p /usr/local/src/
-pushd /usr/local/src/
-  apt-get source ${PKG_NAME}=${PKG_VERSION}
-  apt-get build-dep ${PKG_NAME}=${PKG_VERSION}
-  pushd ${PKG_NAME}-${APP_VERSION}
-    dpkg-checkbuilddeps
-    dpkg-buildpackage -uc -b -us
-  popd
-  mv --force --verbose *.deb ${APT_LOCAL_ARCHIVE}
-
-  source update-apt-local-archive.sh ${APT_LOCAL_ARCHIVE}
-
-  apt-get install --yes --no-install-recommends --allow-unauthenticated --fix-broken ${PKG_NAME}=${PKG_VERSION}
+pushd ${APT_LOCAL_ARCHIVE}
+  dpkg-scanpackages . /dev/null | gzip -9c >Packages.gz
 popd
+
+apt-get update

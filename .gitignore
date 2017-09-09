@@ -23,6 +23,7 @@
 *.aci.asc
 
 travis-todo.yml
+build.log
 
 # Used by dotenv library to load environment variables.
 # .env

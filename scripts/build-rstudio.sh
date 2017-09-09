@@ -24,28 +24,30 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-if [[ $# -lt 3 ]] ; then
-  echo "Usage: build-package <app-name> <pkg-version> <app-version>"
+if [[ $# -lt 1 ]] ; then
+  echo "Usage: build-rstudio.sh <version>"
   exit 1
 fi
 
-PKG_NAME=$1
-PKG_VERSION=$2
-APP_VERSION=$3
+PKG_VERSION=$1
+#1.0.153
+PKG_NAME="rstudio-server"
+RSTUDIO_URL="http://download2.rstudio.org/${PKG_NAME}-${PKG_VERSION}-amd64.deb"
+RSTUDIO_DEB=$(basename ${RSTUDIO_URL})
 
 APT_LOCAL_ARCHIVE=/usr/local/apt/archives
 
-mkdir -p /usr/local/src/
-pushd /usr/local/src/
-  apt-get source ${PKG_NAME}=${PKG_VERSION}
-  apt-get build-dep ${PKG_NAME}=${PKG_VERSION}
-  pushd ${PKG_NAME}-${APP_VERSION}
-    dpkg-checkbuilddeps
-    dpkg-buildpackage -uc -b -us
-  popd
+pushd /tmp
+  busybox wget --output-document ${RSTUDIO_DEB} ${RSTUDIO_URL}
   mv --force --verbose *.deb ${APT_LOCAL_ARCHIVE}
 
   source update-apt-local-archive.sh ${APT_LOCAL_ARCHIVE}
 
-  apt-get install --yes --no-install-recommends --allow-unauthenticated --fix-broken ${PKG_NAME}=${PKG_VERSION}
+  apt-get install --yes --allow-unauthenticated --fix-broken ${PKG_NAME}=${PKG_VERSION}
+
+  echo server-app-armor-enabled=0 >>/etc/rstudio/rserver.conf
+
+  source post-install-rstudio.sh
+
+  rm -rf ${RSTUDIO_DEB}
 popd

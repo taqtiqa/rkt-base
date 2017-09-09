@@ -43,8 +43,39 @@ before_install:
 before_script:
   - openssl aes-256-cbc -pass env:ACI_SECRET -in rkt-base-privatekeys.asc.enc -out rkt-base-privatekeys.asc -d -a
 
-script:
-  - cat ./rkt-base.sh | sudo bash
+jobs:
+  include:
+    - stage: Build Rkt Base
+    - script:
+        - cat ./rkt-base.sh | sudo bash
+      deploy:
+        provider: releases
+        api_key: ${GH_PA_TOKEN}
+        file:
+          - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
+          - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
+          - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.iso"
+        skip_cleanup: true
+        overwrite: true
+        on:
+          tags: /^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$/
+          all_branches: true
+          condition: '$TRAVIS_TAG =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$'
+    - stage: Build R Base
+      script:
+        - cat ./rkt-r-base.sh | sudo bash
+      deploy:
+        provider: releases
+        api_key: ${GH_PA_TOKEN}
+        file:
+          - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-r-${TRAVIS_TAG}-linux-${ARCH}.aci"
+          - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-r-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
+        skip_cleanup: true
+        overwrite: true
+        on:
+          tags: /^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$/
+          all_branches: true
+          condition: '$TRAVIS_TAG =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$'
 
 # Deploy public key to gh-pages
 after_deploy:
@@ -57,17 +88,17 @@ after_deploy:
       fi
 # Deploy only builds with release semantic version numbers
 # Example: 1.2.3.4 BUT NOT 1.2.3-4 or 1.2.3-2+4
-deploy:
-  - provider: releases
-    api_key: ${GH_PA_TOKEN}
-    file:
-      - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
-      - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
-      - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.iso"
-    skip_cleanup: true
-    overwrite: true
-    on:
-      tags: /^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$/
-      all_branches: true
-      condition: '$TRAVIS_TAG =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$'
+#deploy:
+#  - provider: releases
+#    api_key: ${GH_PA_TOKEN}
+#    file:
+#      - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci"
+#      - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.aci.asc"
+#      - "${TRAVIS_BUILD_DIR}/${ACI_NAME}-${TRAVIS_TAG}-linux-${ARCH}.iso"
+#    skip_cleanup: true
+#    overwrite: true
+#    on:
+#      tags: /^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$/
+#      all_branches: true
+#      condition: '$TRAVIS_TAG =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$'
 

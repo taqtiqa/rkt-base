@@ -24,28 +24,17 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-if [[ $# -lt 3 ]] ; then
-  echo "Usage: build-package <app-name> <pkg-version> <app-version>"
+if [[ $# -gt 0 ]] ; then
+  echo "Usage: build-repo.sh"
   exit 1
 fi
 
-PKG_NAME=$1
-PKG_VERSION=$2
-APP_VERSION=$3
+APT_LOCAL_ARCHIVE_DIR=/usr/local/apt/archives
 
-APT_LOCAL_ARCHIVE=/usr/local/apt/archives
+mkdir -p ${APT_LOCAL_ARCHIVE_DIR}
 
-mkdir -p /usr/local/src/
-pushd /usr/local/src/
-  apt-get source ${PKG_NAME}=${PKG_VERSION}
-  apt-get build-dep ${PKG_NAME}=${PKG_VERSION}
-  pushd ${PKG_NAME}-${APP_VERSION}
-    dpkg-checkbuilddeps
-    dpkg-buildpackage -uc -b -us
-  popd
-  mv --force --verbose *.deb ${APT_LOCAL_ARCHIVE}
+cat << EOF >/etc/apt/sources.list.d/local.list
+deb file:${APT_LOCAL_ARCHIVE_DIR} ./
+EOF
 
-  source update-apt-local-archive.sh ${APT_LOCAL_ARCHIVE}
-
-  apt-get install --yes --no-install-recommends --allow-unauthenticated --fix-broken ${PKG_NAME}=${PKG_VERSION}
-popd
+source update-apt-local-archive.sh

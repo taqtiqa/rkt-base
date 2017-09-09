@@ -58,7 +58,7 @@ EOF
 # After trusty the GNU packages seem to be in the std Ubuntu repositories
 case "${BUILD_RELEASE}" in
   hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|trusty)
-    cat << EOF >> ${ROOTFS}/etc/apt/sources.list
+    cat << EOF >> ${ROOTFS}/etc/apt/sources.d/gnu.list
 # PPA repositories without having to install more cruft
 deb http://ppa.launchpad.net/dns/gnu/ubuntu ${BUILD_RELEASE} main
 deb-src http://ppa.launchpad.net/dns/gnu/ubuntu ${BUILD_RELEASE} main

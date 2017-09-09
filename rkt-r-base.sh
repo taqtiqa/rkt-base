@@ -69,7 +69,7 @@ export RSTUDIO_VERSION='1.0.153'
 export BUILD_DEP_NAME='rkt-base'
 export BUILD_DEP_VERSION=$(cat ./VERSION)
 
-export BUILD_ACI_NAME='rkt-r-base'
+export BUILD_ACI_NAME='rkt-base-r'
 
 export BUILD_FILE=${BUILD_ACI_NAME}-${BUILD_VERSION}-linux-${BUILD_ARCH}
 export BUILD_ARTIFACTS_DIR='.'
@@ -92,13 +92,6 @@ ${ACBUILD} label add os linux
 ${ACBUILD} annotation add authors "${BUILD_AUTHOR} <${BUILD_EMAIL}>"
 ${ACBUILD} annotation add created "$( date --rfc-3339=seconds | sed 's/ /T/' )"
 
-${ACBUILD} run -- apt-get update
-${ACBUILD} run -- apt-get install --yes ${BUILDDEPS}
-${ACBUILD} copy-to-dir scripts/build-packages.sh scripts/build-littler.sh scripts/build-rstudio.sh /usr/local/bin
-${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-packages.sh r-base ${R_DEB_VERSION} ${R_VERSION}"
-${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-littler.sh ${LITTLER_VERSION}"
-${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-rstudio.sh ${RSTUDIO_VERSION}"
-
 #
 # Setup RServer users
 #
@@ -110,7 +103,13 @@ ${ACBUILD} set-group 1000
 # Add a port for the RServer
 ${ACBUILD} port add rserver tcp 8787
 
-${ACBUILD} run -- /usr/bin/rstudio-server verify-installation
+${ACBUILD} run -- apt-get update
+${ACBUILD} run -- apt-get install --yes ${BUILDDEPS}
+${ACBUILD} copy-to-dir scripts/build-packages.sh scripts/build-local-repo.sh scripts/update-apt-local-archive.sh scripts/build-littler.sh scripts/build-rstudio.sh scripts/post-install-rstudio.sh /usr/local/bin
+${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-local-repo.sh"
+${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-packages.sh r-base ${R_DEB_VERSION} ${R_VERSION}"
+${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-littler.sh ${LITTLER_VERSION}"
+${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-rstudio.sh ${RSTUDIO_VERSION}"
 
 #Configure RServer and RSession
 # https://support.rstudio.com/hc/en-us/articles/200552316-Configuring-the-Server
@@ -128,9 +127,10 @@ ${ACBUILD} run -- apt-get autoremove --purge -y
 ${ACBUILD} run -- apt-get clean
 ${ACBUILD} run -- rm -rf /tmp/*
 
-${ACBUILD} run --  /usr/bin/rstudio-server verify-installation
+# ${ACBUILD} run --  rstudio-server verify-installation
 # Run RStudio Server
-${ACBUILD} set-exec -- nohup /usr/bin/rstudio-server start
+# ${ACBUILD} set-exec -- nohup rstudio-server start
+${ACBUILD} set-exec -- systemctl start rstudio-server.service
 
 echo "Write the Container Image..."
 ${ACBUILD} write --overwrite ${BUILD_ARTIFACT}
