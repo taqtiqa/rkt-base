@@ -17,7 +17,7 @@
 #If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 #
 
-export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+export PS4='+([$0]:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 set -eoux pipefail
 

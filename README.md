@@ -21,11 +21,11 @@ sudo rkt run --interactive taqtiqa.io/rkt-base:8.4.4+0 --exec bash
 ````
 or 
 ````bash
-sudo rkt run --net=host --insecure-options=image --interactive ./image-name-0.0.0-0-linux-amd64.aci --exec bash
+sudo rkt run --net=host --insecure-options=image --interactive taqtiqa.io/rkt-base:8.4.4+0 --exec bash
 ````
 or
 ````bash
-sudo rkt run --dns 8.8.8.8 --net=host --insecure-options=image --interactive ./image-name-0.0.0-0-linux-amd64.aci --exec bash
+sudo rkt run --dns 8.8.8.8 --net=host --insecure-options=image --interactive taqtiqa.io/rkt-base:8.4.4+0 --exec bash
 ````
 
 ## Run rkt Container: Local download
