@@ -75,14 +75,11 @@ export BUILD_FILE=${BUILD_ACI_NAME}-${BUILD_VERSION}-linux-${BUILD_ARCH}
 export BUILD_ARTIFACTS_DIR='.'
 export BUILD_ARTIFACT=${BUILD_ARTIFACTS_DIR}/${BUILD_FILE}.aci
 
-
-BUILDDEPS="build-essential fakeroot dpkg-dev devscripts"
-
 # Built on TAQTIQA Linux base image of Ubuntu (~53 MB)
 ./scripts/rkt-trust.sh "${BUILD_ORG}/${BUILD_DEP_NAME}"
 
-${ACBUILD} begin
-${ACBUILD} dep add "${BUILD_ORG}/${BUILD_DEP_NAME}:${BUILD_DEP_VERSION}"
+${ACBUILD} begin "${BUILD_ORG}/${BUILD_DEP_NAME}:${BUILD_DEP_VERSION}"
+#${ACBUILD} dep add "${BUILD_ORG}/${BUILD_DEP_NAME}:${BUILD_DEP_VERSION}"
 
 ${ACBUILD} set-name ${BUILD_NAME}
 
@@ -92,24 +89,26 @@ ${ACBUILD} label add os linux
 ${ACBUILD} annotation add authors "${BUILD_AUTHOR} <${BUILD_EMAIL}>"
 ${ACBUILD} annotation add created "$( date --rfc-3339=seconds | sed 's/ /T/' )"
 
-#
-# Setup RServer users
-#
-${ACBUILD} run -- groupadd -g 1000 rstudio
-${ACBUILD} run -- useradd -u 1000 -g 1000 -d / -M rstudio
-${ACBUILD} set-user 1000
-${ACBUILD} set-group 1000
-
 # Add a port for the RServer
 ${ACBUILD} port add rserver tcp 8787
 
-${ACBUILD} run -- apt-get update
-${ACBUILD} run -- apt-get install --yes ${BUILDDEPS}
-${ACBUILD} copy-to-dir scripts/build-packages.sh scripts/build-local-repo.sh scripts/update-apt-local-archive.sh scripts/build-littler.sh scripts/build-rstudio.sh scripts/post-install-rstudio.sh /usr/local/bin
-${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-local-repo.sh"
-${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-packages.sh r-base ${R_DEB_VERSION} ${R_VERSION}"
-${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-littler.sh ${LITTLER_VERSION}"
-${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-rstudio.sh ${RSTUDIO_VERSION}"
+${ACBUILD} copy-to-dir scripts/build-env.sh scripts/build-r-init.sh  scripts/build-r-clean.sh scripts/build-packages.sh scripts/build-local-repo.sh scripts/update-apt-local-archive.sh scripts/build-littler.sh scripts/build-rstudio.sh scripts/post-install-rstudio.sh /usr/local/bin
+
+#chroot ${ACBUILD_ROOTFS} /bin/bash -c "eval /usr/local/bin/build-local-repo.sh"
+#chroot ${ROOTFS} /bin/bash -c "eval /usr/local/bin/build-local-repo.sh"
+#chroot ${ROOTFS} /bin/bash -c "eval /usr/local/bin/build-packages.sh r-base ${R_DEB_VERSION} ${R_VERSION}"
+#chroot ${ROOTFS} /bin/bash -c "eval /usr/local/bin/build-littler.sh ${LITTLER_VERSION}"
+#chroot ${ROOTFS} /bin/bash -c "eval /usr/local/bin/build-rstudio.sh ${RSTUDIO_VERSION}"
+
+${ACBUILD} run --engine=chroot -- /bin/bash -c "eval /usr/local/bin/build-r-init.sh"
+${ACBUILD} run --engine=chroot -- /bin/bash -c "eval /usr/local/bin/build-local-repo.sh"
+${ACBUILD} run --engine=chroot -- /bin/bash -c "eval /usr/local/bin/build-packages.sh r-base ${R_DEB_VERSION} ${R_VERSION}"
+${ACBUILD} run --engine=chroot -- /bin/bash -c "eval /usr/local/bin/build-littler.sh ${LITTLER_VERSION}"
+${ACBUILD} run --engine=chroot -- /bin/bash -c "eval /usr/local/bin/build-rstudio.sh ${RSTUDIO_VERSION}"
+${ACBUILD} run --engine=chroot -- /bin/bash -c "eval /usr/local/bin/build-r-clean.sh"
+
+${ACBUILD} set-user 1000
+${ACBUILD} set-group 1000
 
 #Configure RServer and RSession
 # https://support.rstudio.com/hc/en-us/articles/200552316-Configuring-the-Server
@@ -119,13 +118,11 @@ ${ACBUILD} run -- /bin/bash -c "eval /usr/local/bin/build-rstudio.sh ${RSTUDIO_V
 # ${ACBUILD} run -- apt-get purge --assume-yes ${BUILDDEPS}
 # $ACBUILD run -- aptitude purge --assume-yes $BUILDDEPS
 
-${ACBUILD} run -- apt-get purge --assume-yes ${BUILDDEPS}
-
 # Some recurrences have been known
-${ACBUILD} run -- apt-get autoremove --purge -y
-${ACBUILD} run -- apt-get autoremove --purge -y
-${ACBUILD} run -- apt-get clean
-${ACBUILD} run -- rm -rf /tmp/*
+#${ACBUILD} run --engine=chroot -- apt-get autoremove --purge -y
+#${ACBUILD} run --engine=chroot -- apt-get autoremove --purge -y
+#${ACBUILD} run --engine=chroot -- apt-get clean
+#${ACBUILD} run --engine=chroot -- rm -rf /tmp/*
 
 # ${ACBUILD} run --  rstudio-server verify-installation
 # Run RStudio Server

@@ -43,12 +43,21 @@ export DEFAULT_BUILD_ARCH='amd64'
 export DEFAULT_BUILD_VERSION=$(cat ./VERSION)
 export DEFAULT_CI='false'
 export DEFAULT_COMPONENTS='main,universe,multiverse,restricted'
-export DEFAULT_GUEST_PACKAGES='ca-certificates,gnupg,dirmngr,busybox,network-manager,apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
+# NOTE: ACI_RELEASE and BUILD_RELEASE refer to the ACI being built.
+#       DISTRIB_CODENAME refers to the host/build system.
+case "${DISTRIB_CODENAME}" in
+  wily|xenial|zesty|artful)
+    export DEFAULT_GUEST_PACKAGES='systemd-container,ca-certificates,gnupg,dirmngr,busybox,network-manager,apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
+    ;;
+  *)
+    export DEFAULT_GUEST_PACKAGES='ca-certificates,gnupg,dirmngr,busybox,network-manager,apt-utils,language-pack-en,ubuntu-keyring,debian-archive-keyring'
+    ;;
+esac
 export DEFAULT_GUEST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu' #'http://old-releases.ubuntu.com/ubuntu'
 export DEFAULT_HOST_PACKAGE_MIRROR='http://archive.ubuntu.com/ubuntu'
 export DEFAULT_VARIANT='minbase'
 export DEFAULT_ROOTFS='/tmp/rootfs'
-export DEFAULT_RELEASE='master'
+export DEFAULT_RELEASE=${DISTRIB_CODENAME:-'master'}
 export DEFAULT_BUILD_ARTIFACTS_DIR=${CI_ARTIFACTS_DIR:-'/tmp/artifacts'}
 export DEFAULT_ACI_NAME=$(basename $(git remote show -n origin | grep Fetch | cut -d: -f2-) .git)  #: r,littler,rserver no packages installed rkt-rrr-tidy: r,littler,rserver recommends and tidy packages, rkt-rrr-devel: r,littler,rserver recommends and tidy devel environment
 export DEFAULT_SLUG="example.com/${DEFAULT_ACI_NAME}"
@@ -73,6 +82,7 @@ export BUILD_COMPONENTS=${ACI_COMPONENTS:-${DEFAULT_COMPONENTS}}
 export BUILD_EMAIL=${ACI_EMAIL:-${DEFAULT_BUILD_EMAIL}}
 export BUILD_ORG=${ACI_ORG:-${DEFAULT_ORG}}
 export BUILD_RELEASE=${ACI_RELEASE:-${DEFAULT_RELEASE}}
+export BUILD_GUEST_TEMP_PACKAGES=${ACI_TEMP_PACKAGES:-${DEFAULT_GUEST_TEMP_PACKAGES}}  # These should all be purged
 export BUILD_GUEST_PACKAGES=${ACI_PACKAGES:-${DEFAULT_GUEST_PACKAGES}}
 export BUILD_GUEST_PACKAGE_MIRROR=${CI_PACKAGE_MIRROR:-${DEFAULT_GUEST_PACKAGE_MIRROR}}
 export BUILD_VERSION=${CI_BUILD_VERSION:-${DEFAULT_BUILD_VERSION}}
@@ -101,6 +111,7 @@ export TERM=linux
 export DEBIAN_FRONTEND='noninteractive'
 
 export ACBUILD='/bin/acbuild --debug'
-export ACBUILD_CHROOT="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
+#export ACBUILD_CHROOT="/bin/acbuild-chroot --chroot ${ROOTFS} --working-dir /tmp"
+export ACBUILD_CHROOT="/bin/acbuild-chroot"
 
 export BUILD_NAME="${BUILD_ORG}/${BUILD_ACI_NAME}"

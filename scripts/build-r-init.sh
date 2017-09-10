@@ -24,36 +24,13 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-if [[ $# -lt 1 ]] ; then
-  echo "Usage: build-rstudio.sh <version>"
+if [[ $# -gt 0 ]] ; then
+  echo "Usage: build-r-init.sh"
   exit 1
 fi
 
-PKG_VERSION=$1
-#1.0.153
-PKG_NAME="rstudio-server"
-RSTUDIO_URL="http://download2.rstudio.org/${PKG_NAME}-${PKG_VERSION}-amd64.deb"
-RSTUDIO_DEB=$(basename ${RSTUDIO_URL})
+export DEFAULT_GUEST_TEMP_PACKAGES='build-essential,fakeroot,dpkg-dev,devscripts'
 
-APT_LOCAL_ARCHIVE=/usr/local/apt/archives
+apt-get update
+apt-get install --yes ${BUILD_GUEST_TEMP_PACKAGES}
 
-#
-# Setup RStudio RServer users
-#
-groupadd -g 1000 rstudio
-useradd -u 1000 -g 1000 -d / -M rstudio
-
-pushd /tmp
-  busybox wget --output-document ${RSTUDIO_DEB} ${RSTUDIO_URL}
-  mv --force --verbose *.deb ${APT_LOCAL_ARCHIVE}
-
-  source update-apt-local-archive.sh ${APT_LOCAL_ARCHIVE}
-
-  apt-get install --yes --allow-unauthenticated --fix-broken ${PKG_NAME}=${PKG_VERSION}
-
-  echo server-app-armor-enabled=0 >>/etc/rstudio/rserver.conf
-
-  source post-install-rstudio.sh
-
-  rm -rf ${RSTUDIO_DEB}
-popd

@@ -21,6 +21,8 @@
 #   rkt-base.sh </rootfs/path>
 #
 
+export PS4='+([$0]:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+
 set -eoux pipefail
 
 source scripts/build-env.sh
